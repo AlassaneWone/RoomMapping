@@ -17,10 +17,12 @@ import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import {FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@mui/material";
 import Box from "@mui/material/Box"
+import Games from "./Games";
 
 function MapOptions(...props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [publishOpen, setPublishOpen] = React.useState(false);
+    const [selectedValue, setSelectedValue] = React.useState('statique');
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -34,6 +36,7 @@ function MapOptions(...props) {
     };
     const handlePublishClose = () => {
         setPublishOpen(false);
+        props.publishClose(selectedValue);
     }
     return (
         <Box>
@@ -79,7 +82,8 @@ function Popup(props) {
     const handlePlaceHolder = () => {
         console.log('placeholder function for publishing static map')
     }
-    return(
+
+    return (
         <Dialog open={props.publishOpen} onClose={props.publishClose}>
             <DialogContent>
                 <FormControl>
@@ -91,7 +95,7 @@ function Popup(props) {
                     >
                         <FormControlLabel value="statique" control={<Radio/>} label="statique"/>
                         <FormControlLabel value="dynamique" control={<Radio/>} label="dynamique"/>
-                        <FormControlLabel value="group" control={<Radio/>} label="group"/>
+                        <FormControlLabel value="parties" control={<Radio/>} label="parties"/>
                     </RadioGroup>
                 </FormControl>
                 {popupContent === 'statique' && <div>
@@ -101,8 +105,8 @@ function Popup(props) {
                 {popupContent === 'dynamique' && <div>
                     <p>dynamique</p>
                 </div>}
-                {popupContent === 'group' && <div>
-                    <p>group</p>
+                {popupContent === 'parties' && <div>
+                    <p>Vous pouvez créer des parties et publier des cartes interactives pour chaque équipe</p>
                 </div>}
 
             </DialogContent>
@@ -115,7 +119,7 @@ function Popup(props) {
 
 export default function MapList() {
     return (
-        <Box style={{justifyContent:'center', display:'flex',height:'90vh'}} sx={{width:1}}>
+        <Box style={{justifyContent: 'center', display: 'flex', height: '90vh'}} sx={{width: 1}}>
             <ImageList sx={{width: 700, height: 1000}}>
                 <ImageListItem key="Subheader" cols={2}>
                     <ListSubheader component="div">Nombre de scans : {itemData.length}</ListSubheader>

@@ -1,0 +1,41 @@
+{
+  "id1": {
+    "name": "Jeu 1",
+    "date": "2023-01-01",
+    "teams": {
+      "team1": {"name": "Équipe A1", "roomid": "A1"},
+      "team2": {"name": "Équipe A2", "roomid": "A2"}
+    }
+  },
+  "id2": {
+    "name": "Jeu 2",
+    "date": "2023-02-01",
+    "teams": {
+      "team1": {"name": "Équipe B1", "roomid": "B1"}
+    }
+  },
+  "id3": {
+    "name": "Jeu 3",
+    "date": "2023-03-01",
+    "teams": {
+      "team1": {"name": "Équipe C1", "roomid": "C1"},
+      "team2": {"name": "Équipe C2", "roomid": "C2"}
+    }
+  },
+  "id4": {
+    "name": "Jeu 4",
+    "date": "2023-04-01",
+    "teams": {
+      "team1": {"name": "Équipe D1", "roomid": "D1"},
+      "team2": {"name": "Équipe D2", "roomid": "D2"},
+      "team3": {"name": "Équipe D3", "roomid": "D3"}
+    }
+  },
+  "id5": {
+    "name": "Jeu 5",
+    "date": "2023-05-01",
+    "teams": {
+      "team1": {"name": "Équipe E1", "roomid": "E1"}
+    }
+  }
+}
