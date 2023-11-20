@@ -1,0 +1,31 @@
+.map-editor {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 90vh;
+}
+
+.edit-h2 {
+    text-align: center;
+    color: black;
+    font-size: 2.5rem;
+}
+
+.tools {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 20%;
+    margin-left: 2em;
+}
+
+.konva {
+    margin: auto;
+    border: 3px solid black;
+}
+
+.map-size-select {
+    margin: 1em;
+}

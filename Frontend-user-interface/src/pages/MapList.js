@@ -1,24 +1,14 @@
 import * as React from 'react';
-import ImageList from '@mui/material/ImageList';
-import ImageListItem from '@mui/material/ImageListItem';
-import ImageListItemBar from '@mui/material/ImageListItemBar';
-import ListSubheader from '@mui/material/ListSubheader';
-import IconButton from '@mui/material/IconButton';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
+import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box,
+    DialogActions, DialogContent, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
+} from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import {grey} from '@mui/material/colors';
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import TextField from "@mui/material/TextField";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import {FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@mui/material";
-import Box from "@mui/material/Box"
+import { grey } from '@mui/material/colors';
+
+import { useNavigate } from "react-router-dom";
 
 function MapOptions(...props) {
+    const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [publishOpen, setPublishOpen] = React.useState(false);
     const open = Boolean(anchorEl);
@@ -34,6 +24,11 @@ function MapOptions(...props) {
     };
     const handlePublishClose = () => {
         setPublishOpen(false);
+    }
+    const toMapEditor = () => {
+        navigate('/mapEditor', {
+            state: props[0]['img']
+        })
     }
     return (
         <Box>
@@ -54,10 +49,7 @@ function MapOptions(...props) {
                     'aria-labelledby': 'basic-button',
                 }}
             >
-                <MenuItem onClick={() => {
-                    console.log('modifying');
-                    handleClose()
-                }}>Modifier</MenuItem>
+                <MenuItem onClick={toMapEditor}>Modifier</MenuItem>
                 <MenuItem onClick={handleClose}>Supprimer</MenuItem>
                 <MenuItem onClick={handlePublish}>Publier</MenuItem>
                 <MenuItem onClick={() => {
@@ -144,43 +136,27 @@ export default function MapList() {
 
 const itemData = [
     {
-        img: require('../assets/parcelle.png'),
+        img: require('../assets/CS-minimap.png'),
         title: 'Plan 1',
         rows: 2,
         cols: 2,
         featured: true,
     },
     {
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 2',
+        img: require('../assets/CS_dust.png'),
+        title: 'Dust 1',
     },
     {
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 3',
+        img: require('../assets/CS_cache.png'),
+        title: 'Cache',
     },
     {
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 4',
+        img: require('../assets/Slam_map.png'),
+        title: 'Slam algo mock',
         cols: 2,
     },
     {
         img: require('../assets/parcelle.png'),
         title: 'Plan 5',
     },
-    {
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 6',
-    },
-    {
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 7',
-    },
 ];
-
-const styles = {
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    }
-};
