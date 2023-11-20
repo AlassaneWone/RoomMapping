@@ -36,7 +36,6 @@ function MapOptions(...props) {
     };
     const handlePublishClose = () => {
         setPublishOpen(false);
-        props.publishClose(selectedValue);
     }
     return (
         <Box>
@@ -75,12 +74,31 @@ function MapOptions(...props) {
 
 function Popup(props) {
     const [popupContent, setPopupContent] = React.useState('statique')
+    const [childData, setChildData] = React.useState(null)
 
     const handleRadioChange = (event: event) => {
         setPopupContent(event.target.value);
     };
     const handlePlaceHolder = () => {
         console.log('placeholder function for publishing static map')
+    }
+    const handleValidate = () => {
+        if(popupContent === 'statique'){
+            console.log('publishing static map')
+        }
+        else if(popupContent === 'dynamique'){
+            console.log('publishing dynamic map')
+        }
+        else if(popupContent === 'group' && childData != null){
+            console.log('go to match details page')
+        }
+        else
+        console.log('publishing map')
+    }
+
+    const handleChildData = (childData) => {
+        setChildData(childData)
+        console.log(childData)
     }
 
     return (
@@ -95,7 +113,7 @@ function Popup(props) {
                     >
                         <FormControlLabel value="statique" control={<Radio/>} label="statique"/>
                         <FormControlLabel value="dynamique" control={<Radio/>} label="dynamique"/>
-                        <FormControlLabel value="parties" control={<Radio/>} label="parties"/>
+                        <FormControlLabel value="group" control={<Radio/>} label="Matchs"/>
                     </RadioGroup>
                 </FormControl>
                 {popupContent === 'statique' && <div>
@@ -105,13 +123,12 @@ function Popup(props) {
                 {popupContent === 'dynamique' && <div>
                     <p>dynamique</p>
                 </div>}
-                {popupContent === 'parties' && <div>
-                    <p>Vous pouvez créer des parties et publier des cartes interactives pour chaque équipe</p>
-                </div>}
-
+                {popupContent === 'group' && (<div>
+                    <Games onChildData={handleChildData}/>
+                </div>)}
             </DialogContent>
             <DialogActions>
-                <Button onClick={props.publishClose}>Valider</Button>
+                <Button onClick={handleValidate}>Valider</Button>
             </DialogActions>
         </Dialog>
     )

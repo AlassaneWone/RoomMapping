@@ -9,6 +9,8 @@ import Nav from "./pages/Nav";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MyAccount from "./pages/MyAccount";
+import Games from "./pages/Games";
+import NewGame from "./pages/NewGame";
 
 function App() {
     return (
@@ -19,6 +21,8 @@ function App() {
                 <Route path="/login" element={<Login/>}/>
                 <Route path="/register" element={<Register/>}/>
                 <Route path="/myaccount" element={<MyAccount/>}/>
+                <Route path="/games" element={<Games/>}/>
+                <Route path="/newgame" element={<NewGame/>}/>
             </Route>
         </Routes>
     );

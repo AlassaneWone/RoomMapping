@@ -1,0 +1,45 @@
+.new-game-container {
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow-y: auto;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.team-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 8px;
+    margin-right: 5px;
+    box-sizing: border-box;
+}
+
+.remove-button {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.remove-button:hover {
+    background-color: #c9302c;
+}
+
+.remove-button.disabled {
+    background-color: #e6e6e6;
+    cursor: not-allowed;
+    color: #999999;
+}
