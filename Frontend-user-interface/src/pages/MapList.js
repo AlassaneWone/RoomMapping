@@ -17,7 +17,7 @@ import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import {FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@mui/material";
 import Box from "@mui/material/Box"
-import Games from "./Games";
+import GameList from "./GameList";
 
 function MapOptions(...props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -74,43 +74,17 @@ function MapOptions(...props) {
 
 function Popup(props) {
     const [popupContent, setPopupContent] = React.useState('statique')
-    const [selectedMap, setSelectedMap] = React.useState(null)
 
     const handleRadioChange = (event: event) => {
         setPopupContent(event.target.value);
-        if (event.target.value === 'group') {
-            setSelectedMap(null)
-        }
     };
     const handlePlaceHolder = () => {
         console.log('placeholder function for publishing static map')
     }
     const handleValidate = () => {
-        if (popupContent === 'statique') {
-            console.log('publishing static map')
-        } else if (popupContent === 'dynamique') {
-            console.log('publishing dynamic map')
-        } else if (popupContent === 'group' && selectedMap != null) {
-            console.log('go to match details page')
-        } else if (selectedMap === "newGame") {
-            console.log('creating new game')
-        }
-    }
-    const handleSelectedMatch = (selectedMap) => {
-        setSelectedMap(selectedMap)
-        console.log(selectedMap)
-    }
-    let buttonText = "Valider";
-
-    if (popupContent === "group") {
-        if (selectedMap === "newGame") {
-            buttonText = "Créer un nouveau match"
-        } else {
-            buttonText = selectedMap ? "Détails" : "Aucun match sélectionné";
-        }
+        console.log('validate function for publishing static map')
     }
 
-    const isButtonDisabled = popupContent === "group" && selectedMap === null;
     return (
         <Dialog open={props.publishOpen} onClose={props.publishClose}>
             <DialogContent>
@@ -134,14 +108,16 @@ function Popup(props) {
                     <p>dynamique</p>
                 </div>}
                 {popupContent === 'group' && (<div>
-                    <Games onSelectedMatch={handleSelectedMatch}/>
+                    <GameList/>
                 </div>)}
             </DialogContent>
-            <DialogActions>
-                <Button onClick={handleValidate} disabled={isButtonDisabled}>
-                    {buttonText}
-                </Button>
-            </DialogActions>
+            {popupContent !== 'group' && (
+                <DialogActions>
+                    <Button onClick={handleValidate}>
+                        Valider
+                    </Button>
+                </DialogActions>
+            )}
         </Dialog>
     )
 }
