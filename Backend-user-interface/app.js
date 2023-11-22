@@ -6,12 +6,20 @@ const logger = require('morgan');
 require('dotenv').config()
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
 const uploadRouter = require('./routes/uploadFile');
 const deleteRouter = require('./routes/deleteFile');
+const gameRouter = require('./routes/r_game');
 
-var app = express();
+const app = express();
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  next();
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,11 +32,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use("/api", uploadRouter);
-
 app.use("/api/delete", deleteRouter);
-
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/api/game', gameRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

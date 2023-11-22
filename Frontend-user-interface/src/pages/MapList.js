@@ -64,7 +64,7 @@ function MapOptions(...props) {
                     window.open(props[0]['img'], '_blank')
                 }}>Agrandir</MenuItem>
             </Menu>
-            <Popup publishOpen={publishOpen} publishClose={handlePublishClose}/>
+            <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['mapId']}/>
         </Box>
     )
 }
@@ -105,7 +105,7 @@ function Popup(props) {
                     <p>dynamique</p>
                 </div>}
                 {popupContent === 'group' && (<div>
-                    <GameList/>
+                    <GameList mapId={props.mapId}/>
                 </div>)}
             </DialogContent>
             {popupContent !== 'group' && (
@@ -138,7 +138,7 @@ export default function MapList() {
                             title={item.title}
                             subtitle={item.author}
                             actionIcon={
-                                <MapOptions img={item.img}/>
+                                <MapOptions img={item.img} mapId={item.id}/>
                             }
                         />
                     </ImageListItem>
@@ -150,6 +150,7 @@ export default function MapList() {
 
 const itemData = [
     {
+        id: "KPReniUNwqmrLBI0Rxai",
         img: require('../assets/parcelle.png'),
         title: 'Plan 1',
         rows: 2,
@@ -157,28 +158,34 @@ const itemData = [
         featured: true,
     },
     {
+        id: "KPReniUNwqmrLBI0Rxai",
         img: require('../assets/parcelle.png'),
         title: 'Plan 2',
     },
     {
+        id: "KPReniUNwqmrLBI0Rxai",
         img: require('../assets/parcelle.png'),
         title: 'Plan 3',
     },
     {
+        id: "KPReniUNwqmrLBI0Rxai",
         img: require('../assets/parcelle.png'),
         title: 'Plan 4',
         cols: 2,
     },
     {
+        id: "KPReniUNwqmrLBI0Rxai",
         img: require('../assets/parcelle.png'),
         title: 'Plan 5',
     },
     {
+        id: "KPReniUNwqmrLBI0Rxai",
         img: require('../assets/parcelle.png'),
         title: 'Plan 6',
     },
     {
-        img: require('../assets/parcelle.png'),
+        id: "KPReniUNwqmrLBI0Rxai",
+        img: require('../assets/radar.png'),
         title: 'Plan 7',
     },
 ];

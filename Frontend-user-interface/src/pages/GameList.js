@@ -6,56 +6,14 @@ import Button from "@mui/material/Button";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import GameDetails from "./GameDetails";
+import {getAuth, onAuthStateChanged} from "firebase/auth";
 
-const gameData = {
-    id1: {
-        name: "Jeu 1",
-        date: "2023-01-01",
-        teams: {
-            team1: {name: "Équipe A1", roomid: "A1"},
-            team2: {name: "Équipe A2", roomid: "A2"}
-        }
-    },
-    id2: {
-        name: "Jeu 2",
-        date: "2023-02-01",
-        teams: {
-            team1: {name: "Équipe B1", roomid: "B1"}
-        }
-    },
-    id3: {
-        name: "Jeu 3",
-        date: "2023-03-01",
-        teams: {
-            team1: {name: "Équipe C1", roomid: "C1"},
-            team2: {name: "Équipe C2", roomid: "C2"}
-        }
-    },
-    id4: {
-        name: "Jeu 4",
-        date: "2023-04-01",
-        teams: {
-            team1: {name: "Équipe D1", roomid: "D1"},
-            team2: {name: "Équipe D2", roomid: "D2"},
-            team3: {name: "Équipe D3", roomid: "D3"}
-        }
-    },
-    id5: {
-        name: "Jeu 5",
-        date: "2023-05-01",
-        teams: {
-            team1: {name: "Équipe E1", roomid: "E1"}
-        }
-    }
-};
-
-
-const GameList = () => {
+const GameList = (props) => {
     const [fetchData, setfetchData] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const [creatingNewGame, setCreatingNewGame] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
-    const [showDetails, setShowDetails] = useState(false); // Nouvel état ajouté
+    const [showDetails, setShowDetails] = useState(false);
 
     const handleCreateGame = () => {
         console.log("Create game function");
@@ -67,11 +25,34 @@ const GameList = () => {
         setShowDetails(true); // Activer l'affichage du détail
     };
 
+    const fetchGames = (uid) => {
+        fetch(`http://localhost:5000/api/game/${uid}/${props.mapId}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.json()
+                }
+                throw new Error("There has been a problem with your fetch operation")
+            })
+            .then(data => {
+                console.log(data)
+                setfetchData(data);
+                setIsLoaded(true)
+            }).catch((error) => {
+            console.log('error: ' + error);
+        });
+    };
+
     useEffect(() => {
-        setfetchData(gameData);
-        const firstGameId = Object.keys(gameData)[0];
-        setSelectedRow(firstGameId);
-        setIsLoaded(true);
+        const auth = getAuth();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const uid = user.uid;
+                fetchGames(uid);
+
+            } else {
+                redirect('/login');
+            }
+        });
     }, []);
 
     const buttonText = selectedRow ? "Détails" : "Aucun match Sélectionné";
@@ -81,9 +62,9 @@ const GameList = () => {
     if (!isLoaded) {
         return <div>Loading...</div>;
     } else if (creatingNewGame) {
-        return <NewGame onCancel={() => setCreatingNewGame(false)} />;
+        return <NewGame onCancel={() => setCreatingNewGame(false)} mapId={props.mapId}/>;
     } else if (showDetails) {
-        return <GameDetails gameId={selectedRow} onBack={() => setShowDetails(false)} />;
+        return <GameDetails gameId={selectedRow} onBack={() => setShowDetails(false)}/>;
     } else {
         return (
             <div>
@@ -119,8 +100,8 @@ const ListeDesJeux = (props) => {
         props.setSelectedRow(id === props.selectedRow ? null : id);
     };
 
-    const removeTeam = (id) => {
-        console.log(`Remove team function for game ${id}`);
+    const removeGame = (gameId) => {
+        console.log(`Remove game function for game ${gameId}`);
     };
 
     const renderGameItem = (id) => (
@@ -132,16 +113,27 @@ const ListeDesJeux = (props) => {
                     </button>
                     <button
                         type="button"
-                        onClick={() => removeTeam(id)}
+                        onClick={() => removeGame(props.data[id].gameId)} // Pass gameId to removeGame
                         className='action-button remove-button'
                     >
                         <span role="img" aria-label="Supprimer">-</span>
                     </button>
                 </div>
             )}
-            <div className="game-info" onClick={() => {handleRowClick(id); props.setSelectedRow(id)}}>
+            <div className="game-info" onClick={() => {
+                handleRowClick(id);
+                props.setSelectedRow(id);
+            }}>
                 <span>{props.data[id].name}</span>
-                <span>{props.data[id].date}</span>
+                <span>{<span>{new Intl.DateTimeFormat('fr-FR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }).format(new Date(props.data[id].date)) + ' à ' + new Date(props.data[id].date).toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}</span>
+                }</span>
             </div>
         </li>
     );

@@ -3,16 +3,31 @@ import '../styles/NewGame.css';
 import {redirect} from "react-router-dom";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
+import {getAuth, onAuthStateChanged} from "firebase/auth";
+import {useEffect} from "react";
 
-const NewGame = ({onCancel}) => {
+const NewGame = (props) => {
     const [gameName, setGameName] = useState('');
     const [gameDate, setGameDate] = useState('');
     const [gameTime, setGameTime] = useState('');
     const [teams, setTeams] = useState(['', '']);
+    const [userId, setUserId] = useState('');
 
     const addTeam = () => {
         setTeams([...teams, '']);
     };
+    useEffect(() => {
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const uid = user.uid;
+                setUserId(uid);
+            }
+        });
+
+        // Cleanup function to unsubscribe when the component unmounts
+        return () => unsubscribe();
+    }, []);
 
     const removeTeam = (index) => {
         if (teams.length > 2) {
@@ -28,19 +43,64 @@ const NewGame = ({onCancel}) => {
         setTeams(updatedTeams);
     };
 
-    const submitForm = () => {
-        if (gameName && gameDate && gameTime && teams.every(team => team.trim() !== '')) {
-            console.log('Nom du match:', gameName);
-            console.log('Date du match:', gameDate);
-            console.log('Heure du match:', gameTime);
-            console.log('Équipes:', teams);
-        } else {
-            console.log('Veuillez remplir tous les champs');
-        }
-
+    const generateRandomSessionId = () => {
+        return Math.random().toString(36).substring(2, 8);
     };
 
-    return (<div>
+    const submitForm = () => {
+        const currentDate = new Date();
+        const selectedDate = new Date(`${gameDate}T${gameTime}`);
+        if (gameName && gameDate && gameTime && teams.every(team => team.trim() !== '')) {
+            if (selectedDate <= currentDate) {
+                errorDisplay(["La date et l'heure doivent être dans le futur."]);
+                return;
+            }
+            const formData = {
+                userId: userId,
+                mapId: props.mapId,
+                name: gameName,
+                date: selectedDate,
+                teams: teams.map((team, index) => ({
+                    name: team.trim(),
+                    roomId: generateRandomSessionId()
+                }))
+            };
+
+            console.log(JSON.stringify(formData));
+
+            fetch(`http://localhost:5000/api/game`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            }).then(response => {
+                return response.json();
+            }).then(res => {
+                if (res === 201) {
+                    successDisplay();
+                } else {
+                    errorDisplay([res.errors]);
+                }
+            });
+        } else {
+            errorDisplay(['Veuillez remplir tous les champs']);
+        }
+    };
+
+    const successDisplay = () => {
+        console.log("Votre partie a bien été créée !")
+    }
+
+    const errorDisplay = (errors) => {
+        for(let i of errors) {
+            console.log(i)
+        }
+    }
+
+    return (<div><Button type="button" onClick={props.onCancel}>
+            Retour
+        </Button>
             <div className="header">
                 <span>Créer un nouveau match :</span>
             </div>
