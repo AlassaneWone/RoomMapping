@@ -1,15 +1,17 @@
 import "../styles/MapEditor.css";
 
-import React, { useState, useRef } from 'react'
-import { useLocation } from 'react-router-dom';
-import { Stage, Layer, Rect, Line, Circle, Image as KonvaImage } from 'react-konva';
+import React, { useState, useRef, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Stage, Layer, Rect, Line, Circle, Image as KonvaImage, Text } from 'react-konva';
 import useImage from 'use-image';
 import { Box, Radio, RadioGroup, FormControl, FormControlLabel, InputLabel, MenuItem,
-    Select, Typography, Slider, Grid, Button } from "@mui/material";
+    Select, Typography, Slider, Grid, Button, CircularProgress } from "@mui/material";
 import DrawIcon from '@mui/icons-material/Draw';
 import InterestsIcon from '@mui/icons-material/Interests';
 import BackspaceIcon from '@mui/icons-material/Backspace';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField } from "@mui/material";
+import { getAuth } from "firebase/auth";
 
 const useMapForKonva = (map) => {
     const [image] = useImage(map);
@@ -17,8 +19,10 @@ const useMapForKonva = (map) => {
 }
 
 const MapEditor = () => {
+    const navigate = useNavigate();
     const { state } = useLocation();
     const map = useMapForKonva(state);
+    const [loading, setLoading] = useState(false);
 
     const [stageSize, setStageSize] = useState("500x500");
 
@@ -31,10 +35,17 @@ const MapEditor = () => {
     const [shapeType, setShapeType] = useState('');
     const [drawingShape, setDrawingShape] = useState(null);
     const [lineWidth, setLineWidth] = useState(2);
-    const [eraserWidth, setEraserWidth] = useState(2);
+    const [eraserWidth, setEraserWidth] = useState(30);
+    const [editingText, setEditingText] = useState(null);
 
     const isDrawing = useRef(false);
     const layerRef = useRef(null);
+
+    useEffect(() => {
+        if (layerRef.current) {
+            layerRef.current.batchDraw();
+        }
+    }, [lines, shapes]);
 
     // Convertir la taille de la scène en un objet lorsque vous en avez besoin
     const stageSizeObject = {
@@ -52,20 +63,54 @@ const MapEditor = () => {
         }
     };
 
-    const saveAsPng = () => {
-        // Obtenez une référence à votre scène Konva
-        const stage = layerRef.current.getStage();
-        // Convertissez le contenu de la scène en une URL de données PNG
-        const dataUrl = stage.toDataURL();
-        // Créez un nouvel élément de lien
-        const link = document.createElement('a');
-        // Définissez l'URL de données comme href du lien
-        link.href = dataUrl;
-        // Définissez l'attribut de téléchargement du lien pour définir le nom du fichier de l'image téléchargée
-        link.download = mapName + '.png';
-        // Déclenchez un clic sur le lien pour commencer le téléchargement
-        link.click();
-      };
+    const saveImageToServer = async (navigate) => {
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        const uid = user.uid;
+
+        if (layerRef.current) {
+            // Convertir l'image en base64
+            const dataUrl = layerRef.current.getStage().toDataURL();
+            // Créer un blob à partir de la chaîne base64
+            const blob = await (await fetch(dataUrl)).blob();
+            // Créer un objet FormData pour la requête
+            const formData = new FormData();
+            formData.append('file', blob, mapName + '.png');
+            // Envoyer la requête à l'API backend
+            fetch(`http://localhost:5000/api/${uid}/upload`, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log(data)
+                setTimeout(() => {
+                    navigate('/maplist')
+                }, 1000);
+            })
+            .catch(error => {
+                console.error(error)
+                setLoading(false)
+            });
+        }
+    };
+    
+    const handleTextDblClick = (index) => {
+        setEditingText(index);
+    };
+
+    const handleTextChange = (e) => {
+        const newText = e.target.value;
+        setShapes(prevShapes => prevShapes.map((shape, i) => {
+            if (i === editingText) {
+                return { ...shape, text: newText };
+            } else {
+                return shape;
+            }
+        }));
+        setEditingText(null);
+    };
 
     const handleMouseDown = (e) => {
         const point = e.target.getStage().getPointerPosition();
@@ -89,6 +134,16 @@ const MapEditor = () => {
             if (shape) {
             setDrawingShape(shape);
             }
+        } else if (tool === 'txt') {
+            const text = {
+                type: 'Text',
+                x: e.evt.x,
+                y: e.evt.y,
+                text: 'Double-cliquez pour éditer',
+                fontSize: 20,
+                draggable: true,
+            };
+            setShapes([...shapes, text]);
         }
     };
     
@@ -189,6 +244,11 @@ const MapEditor = () => {
                                 </Grid>
 
                                 <Grid item xs={6}>
+                                    <FormControlLabel value="txt" control={<Radio />} label={<><span>Zonne de texte </span><TextSnippetIcon /></>} />
+                                </Grid>
+                                <Grid item xs={6}></Grid>
+
+                                <Grid item xs={6}>
                                     <FormControlLabel value="eraser" control={<Radio />} label={<><span>Gomme </span><BackspaceIcon /></>} />
                                 </Grid>
                                 <Grid item xs={6}>
@@ -224,17 +284,17 @@ const MapEditor = () => {
                             />
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => setOpen(false)}>
+                            <Button color="error" variant="contained" onClick={() => setOpen(false)}>
                                 Annuler
                             </Button>
-                            <Button onClick={saveAsPng}>
+                            <Button  variant="contained" onClick={() => saveImageToServer(navigate)}>
                                 Enregistrer
                             </Button>
                         </DialogActions>
                     </Dialog>
                 </Box>
             </div>
-            <Stage className="konva" width={stageSizeObject.width} height={stageSizeObject.height}
+            <Stage className="konva" width={stageSizeObject.width} height={stageSizeObject.height} 
                 onMouseDown={handleMouseDown}
                 onMousemove={handleMouseMove}
                 onMouseup={handleMouseUp}
@@ -261,11 +321,21 @@ const MapEditor = () => {
                         } else if (shape.type === 'Circle') {
                             return <Circle key={i} {...shape} onMouseEnter={() => handleShapeClick(i)} />;
                         } else if (shape.type === 'straightLine') {
-                            return <Line key={i} {...shape} onMouseEnter={() => handleShapeClick(i)} />;
+                            return <Line key={i} points={shape.points} stroke={shape.stroke} onMouseEnter={() => handleShapeClick(i)} />;
+                        } else if (shape.type === 'txt') {
+                            return <Text key={i} points={shape.points} onDblClick={() => handleTextDblClick(i)} />;
                         } else {
-                            return null
+                            return null;
                         }
                     })}
+                    {editingText !== null && (
+                        <input
+                            type="text"
+                            value={shapes[editingText].text}
+                            onChange={handleTextChange}
+                            style={{ position: 'absolute', top: shapes[editingText].y, left: shapes[editingText].x }}
+                        />
+                    )}
                 </Layer>
             </Stage>
         </div>
