@@ -36,7 +36,6 @@ export function Login() {
           setBadCredMessage('Compte désactivé temporairement, veuillez réessayer plus tard');
         }else if (errorCode === 'auth/user-not-found') {
           setBadCredMessage('Aucun compte ne correspond à cet email');
-          
         }else {
           console.log(errorCode, errorMessage);
         }
@@ -67,7 +66,7 @@ export function Login() {
               required
               fullWidth
               id="email"
-              label="Adress email"
+              label="Adresse email"
               name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

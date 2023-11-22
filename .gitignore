@@ -35,8 +35,7 @@ yarn-error.*
 *.tsbuildinfo
 
 #webstorm settings
-.idea
-.idea/workspace.xml
+.idea/
 
 Backend-user-interface/keys/
 Backend-user-interface/.env

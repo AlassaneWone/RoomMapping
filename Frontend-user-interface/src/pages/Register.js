@@ -7,6 +7,8 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { auth } from '../firebase';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
+import { getFirestore, doc, setDoc } from "firebase/firestore"; // Firestore
+
 //Animation d'inscription
 import { useSpring, animated } from 'react-spring';
 
@@ -38,7 +40,7 @@ const navigate = useNavigate();
   function isValidPassword(password) {
     // Format du mot de passe
     // Au moins 8 caractères avec au moins une lettre majuscule, une lettre minuscule et un chiffre
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z0-9!@#$%^&*()_]{8,}$/;
     return passwordRegex.test(password);
   }
 
@@ -82,14 +84,30 @@ const navigate = useNavigate();
       .then((userCredential) => {
         // Signed in 
         const user = userCredential.user;
-        const uid = user.uid;
-        console.log(uid);
         console.log(user);
+
+        // Ajout des données dans Firestore
+        const db = getFirestore();
+        const docRef = doc(db, "users", user.uid)
+        const data = {
+          uid: user.uid,
+          firstname: firstname,
+          lastname: lastname,
+          email: email,
+        };
+
+        setDoc(docRef, data)
+          .then((docRef) => {
+            console.log("Document written with ID: ", docRef.id);
+          })
+          .catch((error) => {
+            console.error("Error adding document: ", error);
+          });
+
         setShowConfirmation(true); // Déclenche l'animation de confirmation
         setTimeout(() => {
           navigate('/');
         }, 1500);
-        // ...
       })
       .catch((error) => {
         const errorCode = error.code;
