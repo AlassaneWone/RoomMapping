@@ -27,5 +27,9 @@
 }
 
 .map-size-select {
-    margin: 1em;
+    margin: 2em;
+}
+
+.map-save-button {
+    margin-top: 3em;
 }
