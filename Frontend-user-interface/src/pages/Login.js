@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Avatar, Button, CssBaseline, TextField, Link as muiLink, Grid, Box, Typography, Container } from '@mui/material'
+import { Avatar, Button, CssBaseline, TextField, Grid, Box, Typography, Container } from '@mui/material'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Link, useNavigate } from "react-router-dom";
@@ -36,7 +36,6 @@ export function Login() {
           setBadCredMessage('Compte désactivé temporairement, veuillez réessayer plus tard');
         }else if (errorCode === 'auth/user-not-found') {
           setBadCredMessage('Aucun compte ne correspond à cet email');
-          
         }else {
           console.log(errorCode, errorMessage);
         }
@@ -67,7 +66,7 @@ export function Login() {
               required
               fullWidth
               id="email"
-              label="Adress email"
+              label="Adresse email"
               name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
