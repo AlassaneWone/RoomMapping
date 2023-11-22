@@ -46,7 +46,7 @@ const gameData = {
 };
 
 
-const Games = ({onChildData}) => {
+const Games = ({onSelectedMatch}) => {
     const [fetchData, setfetchData] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const [showCreateButton, setShowCreateButton] = useState(true);
@@ -55,7 +55,7 @@ const Games = ({onChildData}) => {
 
     const handleCreateGame = () => {
         console.log("Create game function");
-        onChildData('slt')
+        onSelectedMatch("newGame")
         setCreatingNewGame(true);
     };
 
@@ -77,7 +77,7 @@ const Games = ({onChildData}) => {
             </div>
             <div className="games-container">
                 <div className="scrollable-game-container">
-                    <ListeDesJeux data={fetchData} onChildData={onChildData}/>
+                    <ListeDesJeux data={fetchData} onSelectedMatch={onSelectedMatch}/>
                 </div>
                 <button className="create-button" onClick={handleCreateGame}>
                     Créer une nouvelle partie
@@ -92,7 +92,7 @@ const ListeDesJeux = (props) => {
 
     const handleRowClick = (id) => {
         setSelectedRow(id === selectedRow ? null : id);
-        props.onChildData(id === selectedRow ? null : id);
+        props.onSelectedMatch(id === selectedRow ? null : id);
     };
 
     const removeTeam = (id) => {
