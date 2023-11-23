@@ -7,6 +7,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import GameDetails from "./GameDetails";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
+import SettingsIcon from '@mui/icons-material/Settings';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const GameList = (props) => {
     const [fetchData, setfetchData] = useState([]);
@@ -34,7 +36,6 @@ const GameList = (props) => {
                 throw new Error("There has been a problem with your fetch operation")
             })
             .then(data => {
-                console.log(data)
                 setfetchData(data);
                 setIsLoaded(true)
             }).catch((error) => {
@@ -80,7 +81,7 @@ const GameList = (props) => {
                         />
                     </div>
                     <button className="create-button" onClick={handleCreateGame}>
-                        Créer une nouvelle partie
+                        Créer un nouveau match
                     </button>
                 </div>
                 <DialogActions>
@@ -109,14 +110,14 @@ const ListeDesJeux = (props) => {
             {props.selectedRow === id && (
                 <div className="buttons">
                     <button type="button" className="action-button modify-button">
-                        <span role="img" aria-label="Modifier">⚙️</span>
+                        <span role="img" aria-label="Modifier"><SettingsIcon/></span>
                     </button>
                     <button
                         type="button"
                         onClick={() => removeGame(props.data[id].gameId)} // Pass gameId to removeGame
                         className='action-button remove-button'
                     >
-                        <span role="img" aria-label="Supprimer">-</span>
+                        <span role="img" aria-label="Supprimer"><DeleteIcon/></span>
                     </button>
                 </div>
             )}

@@ -19,7 +19,7 @@ import GameList from "./GameList";
 function MapOptions(...props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [publishOpen, setPublishOpen] = React.useState(false);
-    const [selectedValue, setSelectedValue] = React.useState('statique');
+    const [matchPopupOpen, setMatchPopupOpen] = React.useState(false);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -34,6 +34,12 @@ function MapOptions(...props) {
     const handlePublishClose = () => {
         setPublishOpen(false);
     }
+
+    const handleMatchPopup = () => {
+        setMatchPopupOpen(true);
+        handleClose();
+    };
+
     return (
         <Box>
             <IconButton
@@ -59,12 +65,14 @@ function MapOptions(...props) {
                 }}>Modifier</MenuItem>
                 <MenuItem onClick={handleClose}>Supprimer</MenuItem>
                 <MenuItem onClick={handlePublish}>Publier</MenuItem>
+                <MenuItem onClick={handleMatchPopup}>Matchs</MenuItem>
                 <MenuItem onClick={() => {
                     handleClose();
                     window.open(props[0]['img'], '_blank')
                 }}>Agrandir</MenuItem>
             </Menu>
             <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['mapId']}/>
+            <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['mapId']} />
         </Box>
     )
 }
@@ -94,7 +102,6 @@ function Popup(props) {
                     >
                         <FormControlLabel value="statique" control={<Radio/>} label="statique"/>
                         <FormControlLabel value="dynamique" control={<Radio/>} label="dynamique"/>
-                        <FormControlLabel value="group" control={<Radio/>} label="Matchs"/>
                     </RadioGroup>
                 </FormControl>
                 {popupContent === 'statique' && <div>
@@ -104,9 +111,6 @@ function Popup(props) {
                 {popupContent === 'dynamique' && <div>
                     <p>dynamique</p>
                 </div>}
-                {popupContent === 'group' && (<div>
-                    <GameList mapId={props.mapId}/>
-                </div>)}
             </DialogContent>
             {popupContent !== 'group' && (
                 <DialogActions>
@@ -118,6 +122,20 @@ function Popup(props) {
         </Dialog>
     )
 }
+
+function MatchPopup(props) {
+    const handleValidate = () => {
+        console.log('validate function for match popup');
+        // Ajoutez ici la logique nécessaire pour valider les matchs
+    };
+
+    return (
+        <Dialog open={props.open} onClose={props.onClose}>
+            <GameList mapId={props.mapId}/>
+        </Dialog>
+    );
+}
+
 
 export default function MapList() {
     return (

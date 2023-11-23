@@ -16,6 +16,14 @@ const NewGame = (props) => {
     const addTeam = () => {
         setTeams([...teams, '']);
     };
+
+    const resetForm = () => {
+        setGameName('');
+        setGameDate('');
+        setGameTime('');
+        setTeams(['', '']);
+    };
+
     useEffect(() => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -52,7 +60,7 @@ const NewGame = (props) => {
         const selectedDate = new Date(`${gameDate}T${gameTime}`);
         if (gameName && gameDate && gameTime && teams.every(team => team.trim() !== '')) {
             if (selectedDate <= currentDate) {
-                errorDisplay(["La date et l'heure doivent être dans le futur."]);
+                errorDisplay(["La date et l'heure ne peuvent pas être antérieures à la date actuelle"]);
                 return;
             }
             const formData = {
@@ -65,8 +73,6 @@ const NewGame = (props) => {
                     roomId: generateRandomSessionId()
                 }))
             };
-
-            console.log(JSON.stringify(formData));
 
             fetch(`http://localhost:5000/api/game`, {
                 method: 'POST',
@@ -84,21 +90,32 @@ const NewGame = (props) => {
                 }
             });
         } else {
-            errorDisplay(['Veuillez remplir tous les champs']);
+            errorDisplay(['Veuillez remplir tous les champs du formulaire']);
         }
     };
 
     const successDisplay = () => {
-        console.log("Votre partie a bien été créée !")
-    }
+        const successMessage = "Le match \"" + gameName + "\" a été créé et ajouté à la base de données avec succès";
+
+        document.getElementById("success-message").innerText = successMessage;
+
+        document.getElementsByClassName("errors")[0].style.display = "none";
+        document.getElementsByClassName("success")[0].style.display = "block";
+        resetForm();
+    };
+
 
     const errorDisplay = (errors) => {
+        document.getElementsByClassName("success")[0].style.display = "none";
+        let html = "";
         for(let i of errors) {
-            console.log(i)
+            html += "<li>"+ i + "</li>";
         }
+        document.getElementById("errors").innerHTML = html;
+        document.getElementsByClassName("errors")[0].style.display = "block";
     }
 
-    return (<div><Button type="button" onClick={props.onCancel}>
+    return (<div><Button type="button" onClick={props.onCancel} className={"back-button"}>
             Retour
         </Button>
             <div className="header">
@@ -151,9 +168,17 @@ const NewGame = (props) => {
                     </div>
                 ))}
 
-                <button type="button" onClick={addTeam}>
+                <button type="button" onClick={addTeam} className={"addTeamButton"}>
                     Ajouter une équipe
                 </button>
+                <div className={"errors"}>
+                    <label>Erreur(s): </label>
+                    <ul id={'errors'}></ul>
+                </div>
+                <div className={"success"}>
+                    <label>Succès: </label>
+                    <p id="success-message"></p>
+                </div>
 
                 <DialogActions>
                     <Button onClick={submitForm}>

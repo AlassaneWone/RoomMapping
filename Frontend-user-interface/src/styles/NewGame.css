@@ -1,7 +1,7 @@
 .new-game-container {
     max-width: 400px;
-    margin: auto;
-    border-radius: 5px;
+    margin: 20px;
+    border-radius: 10px;
     overflow-y: auto;
 }
 
@@ -18,7 +18,7 @@ label {
 
 input {
     flex: 1;
-    padding: 8px;
+    padding: 10px;
     margin-right: 5px;
     box-sizing: border-box;
 }
@@ -40,4 +40,43 @@ input {
     background-color: #e6e6e6;
     cursor: not-allowed;
     color: #999999;
+}
+
+.back-button {
+    background-color: #91bdd3;
+    color: white;
+    border: none;
+    padding: 5px;
+    margin: auto;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.errors {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #f2dede;
+    display: none;
+    color: red;
+}
+
+.success {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #dff0d8;
+    display: none;
+    color: green;
+}
+
+.addTeamButton{
+    background-color: #91bdd3;
+    color: black;
+    border: none;
+    padding: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
 }
