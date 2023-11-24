@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter import filedialog
 from tkcalendar import DateEntry
+from tkinter import messagebox
 from PIL import Image, ImageTk
 import boto3
 from dotenv import load_dotenv
@@ -47,13 +48,18 @@ class UploadTab:
         self.lieu_entry = Entry(self.wrapper1)
         self.lieu_entry.grid(row=1, column=1, padx=5, pady=5)
 
+        self.mail_label = Label(self.wrapper1, text="Mail:")
+        self.mail_label.grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        self.mail_entry = Entry(self.wrapper1)
+        self.mail_entry.grid(row=2, column=1, padx=5, pady=5)
+
         self.date_label = Label(self.wrapper1, text="Date:")
-        self.date_label.grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        self.date_label.grid(row=3, column=0, padx=5, pady=5, sticky="e")
         self.date_entry = DateEntry(self.wrapper1)
-        self.date_entry.grid(row=2, column=1, padx=5, pady=5)
+        self.date_entry.grid(row=3, column=1, padx=5, pady=5)
 
         self.upload_button = Button(self.wrapper1, text="Upload Image", command=self.upload_image)
-        self.upload_button.grid(row=3, columnspan=2, pady=10)
+        self.upload_button.grid(row=4, columnspan=2, pady=10)
 
         self.image_label = Label(self.wrapper2)
         self.image_label.pack(side=RIGHT, padx=10)
@@ -71,10 +77,35 @@ class UploadTab:
 
             nom = self.nom_entry.get()
             lieu = self.lieu_entry.get()
+            mail = self.mail_entry.get()
             date = self.date_entry.get()
 
-            object_url = self.upload_to_s3(file_path)
-            self.upload_to_firestore(nom, lieu, date, object_url)
+            if self.validate_fields(nom, lieu, date, mail):
+                user_id = self.get_user_id(mail)
+                if user_id:
+                    self.upload_to_s3(file_path)
+                    self.upload_to_firestore(nom, lieu, date, file_path, mail)
+
+            return mail
+
+    def validate_fields(self, nom, lieu, date, mail):
+        if not nom or not lieu or not date or not mail:
+            messagebox.showerror("Champs manquants", "Veuillez remplir tous les champs.")
+            return False
+        return True
+
+    def get_user_id(self, mail):
+        users_collection = db.collection('users')
+        query = users_collection.where('email', '==', mail)
+        results = query.get()
+
+        for doc in results:
+            user_id = doc.id
+            print(f'Found user with email: {mail}, userId: {user_id}')
+            return user_id
+
+        print(f'No user found with email: {mail}')
+        return None
 
     def upload_to_s3(self, file_path):
         s3 = boto3.client('s3', aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
@@ -86,13 +117,19 @@ class UploadTab:
 
         return object_url
 
-    def upload_to_firestore(self, nom, lieu, date, object_url):
-        operator_collection = db.collection('operator')
-        operator_collection.add({
+    def upload_to_firestore(self, nom, lieu, date, file_path, mail):
+        users_collection = db.collection('users')
+        user_id = self.get_user_id(mail)
+
+        if not user_id:
+            print(f'No user found with email: {mail}')
+            return
+
+        users_collection.document(user_id).collection("maps").add({
             'nom': nom,
             'lieu': lieu,
             'date': date,
-            'url': object_url
+            'url': file_path
         })
 
-        print("Document added to operator")
+        print("Document added to user")
