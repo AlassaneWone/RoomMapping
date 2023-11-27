@@ -43,18 +43,23 @@ exports.createGame = async (req, res) => {
 
         if (typeof req.body.userId !== "string" || req.body.userId === "") {
             errors.push("userId must be a string and not empty")
-        } else if (typeof req.body.mapId !== "string" || req.body.mapId === "") {
+        }
+        if (typeof req.body.mapId !== "string" || req.body.mapId === "") {
             errors.push("mapId must not be empty and must be a string")
-        } else if (typeof req.body.name !== "string" || req.body.name === "") {
+        }
+        if (typeof req.body.name !== "string" || req.body.name === "") {
             errors.push("name must be a string")
-        } else if (typeof req.body.date !== "string" || isNaN(new Date(req.body.date).getTime())){
-            errors.push("date must be a string and must be in a date format")
-        } else if (typeof req.body.teams !== "object" || req.body.teams.length < 2) {
+        }
+        if (typeof req.body.date !== "string" || isNaN(new Date(req.body.date).getTime()) || new Date(req.body.date) <= new Date()) {
+            errors.push("date must be a string, must be in a date format and must be in the future")
+        }
+        if (typeof req.body.teams !== "object" || req.body.teams.length < 2) {
             errors.push("teams must be an array and must contain at least 2 teams")
-        } else if (errors.length === 0) {
+        }
+        if (errors.length === 0) {
             return true
         } else {
-            res.status(422).send({errors});
+            res.status(422).json({errors});
             return false
         }
     }
@@ -69,7 +74,7 @@ exports.createGame = async (req, res) => {
             // Retrieve the automatically generated ID of the new game
             const newGameId = newGameRef.id;
 
-            res.status(201).json(201); // Respond with the new game ID
+            res.status(201).json(201);
         } catch (error) {
             console.error('Erreur lors de la création du match :', error);
             res.status(500).send('Internal Server Error');
