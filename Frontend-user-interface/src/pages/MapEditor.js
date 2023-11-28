@@ -203,6 +203,7 @@ const MapEditor = () => {
                             id="size-select"
                             value={stageSize}
                             label="Taille de carte"
+                            aria-label="Taille de carte"
                             onChange={handleSizeChange}
                         >
                             <MenuItem value="500x500">Petite</MenuItem>
@@ -223,7 +224,7 @@ const MapEditor = () => {
                                     <Slider valueLabelDisplay="auto" min={0} max={10} value={lineWidth} onChange={(e, newValue) => setLineWidth(newValue)}/>
                                 </Grid>
                                 <Grid item xs={1}>
-                                    <input id="colorPicker" type="color" value={lineColor} onChange={(e) => setLineColor(e.target.value)} style={{ marginLeft: '60px', marginTop: '20px' }} />
+                                    <input id="colorPickerPencil" data-testid="colorPickerPencil" type="color" value={lineColor} onChange={(e) => setLineColor(e.target.value)} style={{ marginLeft: '60px', marginTop: '20px' }} />
                                 </Grid>
 
                                 <Grid item xs={6}>
@@ -245,7 +246,7 @@ const MapEditor = () => {
                                     </FormControl>
                                 </Grid>
                                 <Grid item xs={1}>
-                                    <input id="colorPicker" type="color" value={shapeColor} onChange={(e) => setShapeColor(e.target.value)} style={{ marginLeft: '60px', marginTop: '20px' }} />
+                                    <input id="colorPickerShape" type="color" value={shapeColor} onChange={(e) => setShapeColor(e.target.value)} style={{ marginLeft: '60px', marginTop: '20px' }} />
                                 </Grid>
 
                                 <Grid item xs={6}>
@@ -258,7 +259,7 @@ const MapEditor = () => {
                                     <Slider valueLabelDisplay="auto" min={10} max={100} value={textSize} onChange={(e, newValue) => setTextSize(newValue)} />
                                 </Grid>
                                 <Grid item xs={1}>
-                                    <input id="colorPicker" type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} style={{ marginLeft: '60px', marginTop: '20px' }} />
+                                    <input id="colorPickerTxt" type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} style={{ marginLeft: '60px', marginTop: '20px' }} />
                                 </Grid>
 
                                 <Grid item xs={6}>
@@ -278,7 +279,7 @@ const MapEditor = () => {
                 </Box>
                 <Box className="map-save-button">
                     <Button onClick={() => setOpen(true)} variant="contained">
-                        Enregister
+                        Enregistrer
                     </Button>
                     <Dialog open={open} onClose={() => {setOpen(false); setMapNameError(null)}}>
                         <DialogTitle>Enregistrer la carte</DialogTitle>
@@ -301,9 +302,14 @@ const MapEditor = () => {
                             <Button color="error" variant="contained" onClick={() => setOpen(false)}>
                                 Annuler
                             </Button>
-                            {animLoading ? <CircularProgress /> : <Button  variant="contained" onClick={() => saveImageToServer(navigate)}>
-                                Enregistrer
-                            </Button>}
+                            {animLoading ?
+                                <Box width={100}>
+                                    <CircularProgress />
+                                </Box>
+                                :
+                                <Button  variant="contained" onClick={() => saveImageToServer(navigate)}>
+                                    Enregistrer
+                                </Button>}
                         </DialogActions>
                     </Dialog>
                 </Box>
