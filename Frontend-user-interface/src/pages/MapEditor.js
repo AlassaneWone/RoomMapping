@@ -13,12 +13,33 @@ import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField } from "@mui/material";
 import { getAuth } from "firebase/auth";
 
+/**
+ * Custom hook to load an image for use in a Konva stage.
+ * 
+ * @param {string} map - The URL or data of the image to be loaded.
+ * @returns {Image} The loaded image object for use in Konva.Image.
+ */
 const useMapForKonva = (map) => {
     const [image] = useImage(map);
     return image;
 }
 
 const MapEditor = () => {
+    /**
+     * MapEditor component is a functional component that uses hooks for state and side effects.
+     * 
+     * It uses the useNavigate and useLocation hooks from react-router-dom for navigation and location state.
+     * It also uses a custom hook, useMapForKonva, to load an image for use in a Konva stage.
+     * 
+     * The component maintains several state variables using the useState hook:
+     * - stageSize: to store the size of the Konva stage.
+     * - open, mapName, mapNameError, animLoading: to manage the map name dialog and loading animation.
+     * - tool: to store the currently selected drawing tool.
+     * - lines, lineColor, lineWidth: to manage the lines drawn on the Konva stage.
+     * - eraserWidth: to store the width of the eraser tool.
+     * - shapes, shapeType, drawingShape, shapeColor: to manage the shapes drawn on the Konva stage.
+     * - text: to manage the text objects on the Konva stage.
+     */
     const navigate = useNavigate();
     const { state } = useLocation();
     const map = useMapForKonva(state);
@@ -50,12 +71,21 @@ const MapEditor = () => {
     const isDrawing = useRef(false);
     const layerRef = useRef(null);
 
+    /**
+     * useEffect hook to trigger a re-render of the Konva stage whenever the lines or shapes state changes.
+     * The dependency array includes lines and shapes, so this effect runs whenever either of these state variables changes.
+     */
     useEffect(() => {
         if (layerRef.current) {
             layerRef.current.batchDraw();
         }
     }, [lines, shapes]);
 
+    /**
+     * Asynchronous function to save the current state of the Konva stage as an image to the server.
+     * 
+     * @param {function} navigate - The function to navigate to different pages in the app.
+     */
     const saveImageToServer = async (navigate) => {
         const auth = getAuth();
         const user = auth.currentUser;
@@ -93,16 +123,30 @@ const MapEditor = () => {
         }
     };
 
-    // Convertir la taille de la scène en un objet lorsque vous en avez besoin
+    /**
+     * The stageSizeObject is an object that contains the width and height of the Konva stage.
+     */
     const stageSizeObject = {
         width: Number(stageSize.split('x')[0]),
         height: Number(stageSize.split('x')[1])
     };
 
+    /**
+     * Event handler for changing the size of the Konva stage.
+     * 
+     * @param {Event} event - The event object from the change event.
+     */
     const handleSizeChange = (event) => {
         setStageSize(event.target.value);
     };
 
+    /**
+     * This function is called when an object on the stage is clicked.
+     * If the currently selected tool is the eraser and the user is currently drawing,
+     * it removes the clicked object from the shapes and text state arrays.
+     * 
+     * @param {number} index - The index of the clicked object in the shapes and text state arrays.
+     */
     const handleObjectClick = (index) => {
         if (tool === 'eraser' && isDrawing.current) {
             setShapes(prevShapes => prevShapes.filter((shape, i) => i !== index));
@@ -110,6 +154,18 @@ const MapEditor = () => {
         }
     };
 
+    /**
+     * Event handler for the mouse down event on the Konva stage.
+     *
+     * This function is called when the mouse button is pressed down on the stage.
+     * It gets the current pointer position and updates the state based on the currently selected tool.
+     *
+     * If the pen or eraser tool is selected, it starts a new line at the pointer position.
+     * If the shape tool is selected, it starts a new shape at the pointer position.
+     * If the text tool is selected, it starts a new text box at the pointer position.
+     *
+     * @param {Event} e - The event object from the mouse down event.
+     */
     const handleMouseDown = (e) => {
         const point = e.target.getStage().getPointerPosition();
 
@@ -137,6 +193,18 @@ const MapEditor = () => {
         }
     };
     
+    /**
+     * Event handler for the mouse move event on the Konva stage.
+     *
+     * This function is called when the mouse is moved on the stage.
+     * It gets the current pointer position and updates the state based on the currently selected tool and whether the user is currently drawing.
+     *
+     * If the pen or eraser tool is selected, it adds the pointer position to the points of the current line.
+     * If the shape tool is selected, it updates the dimensions of the current shape based on the pointer position.
+     * If the text tool is selected, it updates the dimensions of the current text box based on the pointer position.
+     *
+     * @param {Event} e - The event object from the mouse move event.
+     */
     const handleMouseMove = (e) => {
         // Ne pas dessiner si on n'est pas en mode dessin
         if (!isDrawing.current) return;
@@ -172,6 +240,15 @@ const MapEditor = () => {
         }
     };
     
+    /**
+     * Event handler for the mouse up event on the Konva stage.
+     *
+     * This function is called when the mouse button is released on the stage.
+     * It updates the state based on the currently selected tool and whether the user was drawing.
+     *
+     * If the user was drawing a shape, it adds the shape to the shapes state and resets the drawingShape state.
+     * If the text tool was selected, it prompts the user for the text of the text box and updates the last text box in the text state with the new text.
+     */
     const handleMouseUp = () => {
         isDrawing.current = false;
         if (drawingShape) {
@@ -193,8 +270,10 @@ const MapEditor = () => {
 
     return (
         <div className="map-editor">
+            {/* Container for the tools */}
             <div className="tools">
                 <h2 className="edit-h2">Edition de carte</h2>
+                {/* Container for the map size select */}
                 <Box sx={{ minWidth: 120 }} className="map-size-select">
                     <FormControl fullWidth>
                         <InputLabel id="size-select-lable">Taille de carte</InputLabel>
@@ -212,6 +291,7 @@ const MapEditor = () => {
                         </Select>
                     </FormControl>
                 </Box>
+                {/* Container for the tool radio buttons */}
                 <Box className="radio-tools">
                     <FormControl component="fieldset">
                         <RadioGroup value={tool} onChange={(e) => { setTool(prevTool => prevTool === e.target.value ? null : e.target.value); }}>
@@ -277,6 +357,7 @@ const MapEditor = () => {
                         </RadioGroup>
                     </FormControl>
                 </Box>
+                {/* Container for the save button */}
                 <Box className="map-save-button">
                     <Button onClick={() => setOpen(true)} variant="contained">
                         Enregistrer
@@ -314,13 +395,14 @@ const MapEditor = () => {
                     </Dialog>
                 </Box>
             </div>
+            {/* Konva stage for the map */}
             <Stage className="konva" width={stageSizeObject.width} height={stageSizeObject.height} 
                 onMouseDown={handleMouseDown}
                 onMousemove={handleMouseMove}
                 onMouseup={handleMouseUp}
             >
                 <Layer>
-                    {/* Zone de dessin */}
+                    {/* Layer for the map */}
                     <KonvaImage 
                         image={map}
                         width={stageSizeObject.width}
@@ -331,7 +413,7 @@ const MapEditor = () => {
                     />
                 </Layer>
                 <Layer ref={layerRef}>
-                    {/* Dessin en fonction de l'outil sélectionné */}
+                    {/* Layer for the drawings */}
                     {lines.map((line, i) => (
                         <Line key={i} points={line.points} stroke={line.color} strokeWidth={ line.tool === 'eraser' ? eraserWidth : line.width } tension={0.5} lineCap="round" globalCompositeOperation={ line.tool === 'eraser' ? 'destination-out' : 'source-over' } />
                     ))}
