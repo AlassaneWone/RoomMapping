@@ -53,19 +53,15 @@ describe("NewGame Component", () => {
     test("Bouton ajouter une équipe fontionnel", () => {
         render(<NewGame/>);
 
-        // Vérifiez la longueur de teams avant d'ajouter une équipe
         const teamsBeforeAdding = screen.getAllByPlaceholderText(/Nom de l'équipe/);
         expect(teamsBeforeAdding).toHaveLength(2);
 
-        // Cliquez sur le bouton "Ajouter une équipe"
         const addTeamButton = document.getElementsByClassName("addTeamButton")[0];
         fireEvent.click(addTeamButton);
 
-        // Vérifiez la longueur de teams après avoir ajouté une équipe
         const teamsAfterAdding = screen.getAllByPlaceholderText(/Nom de l'équipe/);
         expect(teamsAfterAdding).toHaveLength(3);
 
-        // Vérifiez qu'un nouveau team-container est ajouté dans le rendu
         const teamContainers = screen.getAllByTestId("team-container");
         expect(teamContainers).toHaveLength(3);
     });
@@ -95,7 +91,6 @@ describe("NewGame Component", () => {
         const submitButton = screen.getByText("Soumettre");
         fireEvent.click(submitButton);
 
-        // Attendre que la requête fetch se termine
         await waitFor(() => {
             expect(screen.getByText("La date et l'heure ne peuvent pas être antérieures à la date actuelle")).toBeInTheDocument();
         });

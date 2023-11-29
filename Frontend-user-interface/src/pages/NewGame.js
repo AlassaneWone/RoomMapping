@@ -3,8 +3,10 @@ import '../styles/NewGame.css';
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const NewGame = (props) => {
+        const apiUrl = process.env.REACT_APP_API_URL;
         const [gameName, setGameName] = useState('');
         const [gameDate, setGameDate] = useState('');
         const [gameTime, setGameTime] = useState('');
@@ -96,7 +98,7 @@ const NewGame = (props) => {
                 }))
             };
 
-            fetch(`http://localhost:5000/api/game`, {
+            fetch(`${apiUrl}/api/game`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -183,7 +185,7 @@ const NewGame = (props) => {
                                 className={`remove-button ${teams.length <= 2 ? 'disabled' : ''}`}
                                 disabled={teams.length <= 2}
                             >
-                                -
+                                <DeleteIcon/>
                             </button>
                         </div>
                     ))}
