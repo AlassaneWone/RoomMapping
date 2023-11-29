@@ -1,0 +1,12 @@
+.Zoomzoom {
+    font-family: sans-serif;
+    text-align: center;
+}
+
+.containerStyle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
