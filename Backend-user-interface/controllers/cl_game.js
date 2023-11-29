@@ -1,7 +1,4 @@
-const {upload} = require('../s3.js');
 const {db} = require('../db.js');
-const {FieldValue} = require("firebase-admin/firestore");
-const {type} = require("http-errors");
 
 exports.getGames = async (req, res) => {
     console.log("Called")
@@ -26,9 +23,6 @@ exports.getGames = async (req, res) => {
         console.error('Erreur lors de la récupération des parties :', error);
         res.status(500).send('Internal Server Error');
     }
-};
-
-exports.getGame = async (req, res) => {
 };
 
 exports.createGame = async (req, res) => {
@@ -73,9 +67,7 @@ exports.createGame = async (req, res) => {
             const gamesCollection = db.collection(`users/${req.body.userId}/maps/${req.body.mapId}/games`);
             const {userId, mapId, ...newData} = req.body;
 
-            const newGameRef = await gamesCollection.add(newData);
-
-            const newGameId = newGameRef.id;
+            await gamesCollection.add(newData);
 
             res.status(201).json(201);
         } catch (error) {

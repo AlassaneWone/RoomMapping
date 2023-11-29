@@ -91,13 +91,13 @@ const NewGame = (props) => {
                 mapId: props.mapId,
                 name: gameName,
                 date: selectedDate,
-                teams: teams.map((team, index) => ({
+                teams: teams.map((team) => ({
                     name: team.trim(),
                     roomId: generateRandomSessionId()
                 }))
             };
 
-            fetch(`${apiUrl}api/game`, {
+            fetch(`${apiUrl}/api/game`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -1,33 +1,30 @@
 import React, {useEffect, useState} from 'react';
-import '../styles/Games.css'
-import {redirect, useNavigate} from "react-router-dom";
+import '../styles/GameList.css'
+import {redirect} from "react-router-dom";
 import NewGame from "./NewGame";
 import Button from "@mui/material/Button";
-import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import GameDetails from "./GameDetails";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import SettingsIcon from '@mui/icons-material/Settings';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const GameList = (props) => {
+    const apiUrl = process.env.REACT_APP_API_URL;
     const [fetchData, setfetchData] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const [creatingNewGame, setCreatingNewGame] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
-    const [showDetails, setShowDetails] = useState(false);
 
     const handleCreateGame = () => {
         setCreatingNewGame(true);
     };
 
     const handleDetails = () => {
-        console.log("Details game function");
-        setShowDetails(true); // Activer l'affichage du détail
+        console.log(`Details for game ${selectedRow}`);
     };
 
     const fetchGames = (uid) => {
-        fetch(`http://localhost:5000/api/game/${uid}/${props.mapId}`)
+        fetch(`${apiUrl}/api/game/${uid}/${props.mapId}`)
             .then(response => {
                 if (response.ok) {
                     return response.json()
@@ -63,8 +60,6 @@ const GameList = (props) => {
         return <div>Loading...</div>;
     } else if (creatingNewGame) {
         return <NewGame onCancel={() => setCreatingNewGame(false)} mapId={props.mapId}/>;
-    } else if (showDetails) {
-        return <GameDetails gameId={selectedRow} onBack={() => setShowDetails(false)}/>;
     } else {
         return (
             <div>
@@ -94,7 +89,6 @@ const GameList = (props) => {
 };
 
 const ListeDesJeux = (props) => {
-
 
     const handleRowClick = (id) => {
         props.setSelectedRow(id === props.selectedRow ? null : id);
