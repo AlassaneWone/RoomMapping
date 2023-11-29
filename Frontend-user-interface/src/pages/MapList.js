@@ -15,6 +15,8 @@ import Dialog from "@mui/material/Dialog";
 import {FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@mui/material";
 import Box from "@mui/material/Box"
 import GameList from "./GameList";
+import {redirect} from "react-router-dom";
+import {getAuth, onAuthStateChanged} from "firebase/auth";
 
 function MapOptions(...props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -88,7 +90,6 @@ function Popup(props) {
     }
     const handleValidate = () => {
         console.log('validate function for publishing static map')
-    }
 
     return (
         <Dialog open={props.publishOpen} onClose={props.publishClose}>
@@ -138,72 +139,77 @@ function MatchPopup(props) {
 
 
 export default function MapList() {
-    return (
-        <Box style={{justifyContent: 'center', display: 'flex', height: '90vh'}} sx={{width: 1}}>
-            <ImageList sx={{width: 700, height: 1000}}>
-                <ImageListItem key="Subheader" cols={2}>
-                    <ListSubheader component="div">Nombre de scans : {itemData.length}</ListSubheader>
-                </ImageListItem>
-                {itemData.map((item) => (
-                    <ImageListItem key={item.img}>
-                        <img
-                            src={item.img}
-                            srcSet={item.img}
-                            alt={item.title}
-                            loading="lazy"
-                        />
-                        <ImageListItemBar
-                            title={item.title}
-                            subtitle={item.author}
-                            actionIcon={
-                                <MapOptions img={item.img} mapId={item.id}/>
-                            }
-                        />
-                    </ImageListItem>
-                ))}
-            </ImageList>
-        </Box>
-    );
-}
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [itemData, setItemData] = useState([]);
 
-const itemData = [
-    {
-        id: "KPReniUNwqmrLBI0Rxai",
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 1',
-        rows: 2,
-        cols: 2,
-        featured: true,
-    },
-    {
-        id: "KPReniUNwqmrLBI0Rxai",
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 2',
-    },
-    {
-        id: "KPReniUNwqmrLBI0Rxai",
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 3',
-    },
-    {
-        id: "KPReniUNwqmrLBI0Rxai",
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 4',
-        cols: 2,
-    },
-    {
-        id: "KPReniUNwqmrLBI0Rxai",
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 5',
-    },
-    {
-        id: "KPReniUNwqmrLBI0Rxai",
-        img: require('../assets/parcelle.png'),
-        title: 'Plan 6',
-    },
-    {
-        id: "KPReniUNwqmrLBI0Rxai",
-        img: require('../assets/radar.png'),
-        title: 'Plan 7',
-    },
-];
+    const fetchMaps = (uid) => {
+        console.log(uid)
+        fetch(`http://localhost:5000/api/map/${uid}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.json()
+                }
+                throw new Error("There has been a problem with your fetch operation")
+            })
+            .then(data => {
+                setItemData(convertToImageListData(data));
+                setIsLoaded(true)
+            }).catch((error) => {
+            console.log('error: ' + error);
+        });
+    };
+
+    function convertToImageListData(data) {
+        return data.map(item => ({
+            id: item.mapId,
+            img: item.url,
+            title: `Image ${item.mapId}`,
+            rows: 2,
+            cols: 2,
+            featured: true,
+        }));
+    }
+
+    useEffect(() => {
+        setIsLoaded(true)
+        const auth = getAuth();
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const uid = user.uid;
+                fetchMaps(uid);
+            } else {
+                redirect('/login');
+            }
+        });
+    }, []);
+    if (!isLoaded) {
+        return <div>Loading...</div>
+    } else {
+        return (
+            <Box style={{justifyContent: 'center', display: 'flex', height: '90vh'}} sx={{width: 1}}>
+                <ImageList sx={{width: 700, height: 1000}}>
+                    <ImageListItem key="Subheader" cols={2}>
+                        <ListSubheader component="div">Nombre de scans : {itemData.length}</ListSubheader>
+                    </ImageListItem>
+                    {itemData.map((item) => (
+                        <ImageListItem key={item.img}>
+                            <img
+                                src={item.img}
+                                srcSet={item.img}
+                                alt={item.title}
+                                loading="lazy"
+                            />
+                            <ImageListItemBar
+                                title={item.title}
+                                subtitle={item.author}
+                                actionIcon={
+                                    <MapOptions img={item.img} mapId={item.id}/>
+                                }
+                            />
+                        </ImageListItem>
+                    ))}
+                </ImageList>
+            </Box>
+        );
+    }
+}
