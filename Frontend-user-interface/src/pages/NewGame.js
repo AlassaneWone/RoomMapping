@@ -97,7 +97,7 @@ const NewGame = (props) => {
                 }))
             };
 
-            fetch(`${apiUrl}api/game`, {
+            fetch(`${apiUrl}/api/game`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
