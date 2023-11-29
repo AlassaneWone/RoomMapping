@@ -13,17 +13,6 @@ const NewGame = (props) => {
         const [teams, setTeams] = useState(['', '']);
         const [userId, setUserId] = useState('');
 
-        const addTeam = () => {
-            setTeams([...teams, '']);
-        };
-
-        const resetForm = () => {
-            setGameName('');
-            setGameDate('');
-            setGameTime('');
-            setTeams(['', '']);
-        };
-
         useEffect(() => {
             const auth = getAuth();
             onAuthStateChanged(auth, (user) => {
@@ -33,6 +22,17 @@ const NewGame = (props) => {
                 }
             });
         }, []);
+
+        const resetForm = () => {
+            setGameName('');
+            setGameDate('');
+            setGameTime('');
+            setTeams(['', '']);
+        };
+
+        const addTeam = () => {
+            setTeams([...teams, '']);
+        };
 
         const removeTeam = (index) => {
             if (teams.length > 2) {
@@ -81,7 +81,6 @@ const NewGame = (props) => {
         }
 
         const submitForm = () => {
-            const currentDate = new Date();
             const selectedDate = new Date(`${gameDate}T${gameTime}`);
 
             if (!dataVerificaiton()) {
@@ -98,7 +97,7 @@ const NewGame = (props) => {
                 }))
             };
 
-            fetch(`${apiUrl}/api/game`, {
+            fetch(`${apiUrl}api/game`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -115,14 +114,12 @@ const NewGame = (props) => {
             });
         }
 
-
         const successDisplay = () => {
             document.getElementById("success-message").innerText = "Le match \"" + gameName + "\" a été créé et ajouté à la base de données avec succès";
             document.getElementsByClassName("errors")[0].style.display = "none";
             document.getElementsByClassName("success")[0].style.display = "block";
             resetForm();
         };
-
 
         const errorDisplay = (errors) => {
             document.getElementsByClassName("success")[0].style.display = "none";
@@ -134,9 +131,10 @@ const NewGame = (props) => {
             document.getElementsByClassName("errors")[0].style.display = "block";
         }
 
-        return (<div><Button type="button" onClick={props.onCancel} className={"back-button"}>
-                Retour
-            </Button>
+        return (<div>
+                <Button type="button" onClick={props.onCancel} className={"back-button"}>
+                    Retour
+                </Button>
                 <div className="header">
                     <span>Créer un nouveau match :</span>
                 </div>

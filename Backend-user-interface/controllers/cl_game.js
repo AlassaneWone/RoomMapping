@@ -28,7 +28,6 @@ exports.getGames = async (req, res) => {
     }
 };
 
-
 exports.getGame = async (req, res) => {
 };
 

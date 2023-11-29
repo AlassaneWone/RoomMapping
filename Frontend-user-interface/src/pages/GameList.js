@@ -18,7 +18,6 @@ const GameList = (props) => {
     const [showDetails, setShowDetails] = useState(false);
 
     const handleCreateGame = () => {
-        console.log("Create game function");
         setCreatingNewGame(true);
     };
 
