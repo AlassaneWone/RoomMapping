@@ -5,6 +5,8 @@ from tkinter.ttk import *
 from tabs.exampleTab import ExampleTab
 from tabs.radarTab import RadarTab
 from tabs.homeTab import HomeTab
+from tabs.uploadTab import UploadTab
+
 
 def donothing():
     pass
@@ -24,6 +26,7 @@ tabControl = Notebook(root)
 home = HomeTab(tabControl)
 radar = RadarTab(tabControl)
 example = ExampleTab(tabControl)
+upload = UploadTab(tabControl)
 tabControl.pack(expand=1, fill="both")
 
 

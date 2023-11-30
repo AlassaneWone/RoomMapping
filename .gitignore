@@ -2,3 +2,25 @@
 DrawingTool/
 Frontend/
 interface_operateur/tabs/__pycache__/
+.env
+interface_operateur/tabs/keys
+__pycache__/
+Scripts
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+pyvenv.cfg
+share/man/man1/ttx.1
