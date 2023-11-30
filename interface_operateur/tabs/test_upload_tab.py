@@ -1,6 +1,7 @@
 import unittest
+import os
 from tkinter.ttk import Notebook
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 from google.cloud.firestore_v1 import FieldFilter
 from uploadTab import UploadTab
 from dotenv import load_dotenv
@@ -15,7 +16,9 @@ from firebase_admin import firestore
 def initialize_firebase_app():
     if not firebase_admin._apps:
         # Si elle n'est pas initialisée, alors seulement l'initialiser
-        cred = credentials.Certificate('././keys/roommapping-group-5-firebase-adminsdk-oycah-ca3f0c23d8.json')
+        json_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'keys',
+                                                      'roommapping-group-5-firebase-adminsdk-oycah-ca3f0c23d8.json'))
+        cred = credentials.Certificate(json_file_path)
         app = firebase_admin.initialize_app(cred)
     return firestore.client()
 
@@ -41,7 +44,7 @@ class TestUploadTab(unittest.TestCase):
         self.upload_tab.upload_image()
 
         # Assertion pour vérifier que la boîte de dialogue d'erreur a été appelée
-        mock_showerror.assert_called_once_with("Champs manquants", "Veuillez remplir tous les champs.")
+        mock_showerror.assert_called_once_with("Missing Fields", "Please fill in all fields.")
 
     @patch('uploadTab.boto3.client')
     def test_upload_to_firestore(self, mock_boto3_client):

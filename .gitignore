@@ -3,4 +3,4 @@ DrawingTool/
 Frontend/
 interface_operateur/tabs/__pycache__/
 .env
-interface_operateur/keys
+interface_operateur/tabs/keys

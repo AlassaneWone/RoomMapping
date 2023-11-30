@@ -7,7 +7,6 @@ from tkcalendar import DateEntry
 from tkinter import messagebox
 from PIL import Image, ImageTk
 from google.cloud.firestore_v1.base_query import FieldFilter
-from google.cloud.firestore_v1.client import Client
 import boto3
 from dotenv import load_dotenv
 
@@ -19,7 +18,9 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
-cred = credentials.Certificate('././keys/roommapping-group-5-firebase-adminsdk-oycah-ca3f0c23d8.json')
+#
+json_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'keys', 'roommapping-group-5-firebase-adminsdk-oycah-ca3f0c23d8.json'))
+cred = credentials.Certificate(json_file_path)
 app = firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -112,7 +113,7 @@ class UploadTab:
     # Method to get the user ID from the email
     def get_user_id(self, mail):
         users_collection = self.db.collection('users')
-        query = users_collection.where('email', '==', mail)
+        query = users_collection.where(filter=FieldFilter('email', '==', mail))
         results = query.get()
 
         # Check if the email exists in Cloud Firestore and retrieve its ID
