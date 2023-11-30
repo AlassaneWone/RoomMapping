@@ -1,26 +1,19 @@
 import * as React from 'react';
-import ImageList from '@mui/material/ImageList';
-import ImageListItem from '@mui/material/ImageListItem';
-import ImageListItemBar from '@mui/material/ImageListItemBar';
-import ListSubheader from '@mui/material/ListSubheader';
-import IconButton from '@mui/material/IconButton';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
+import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Dialog,
+    DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Button } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import {grey} from '@mui/material/colors';
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import {FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@mui/material";
+import { grey } from '@mui/material/colors';
 import Box from "@mui/material/Box"
-import {redirect} from "react-router-dom";
+import { redirect } from "react-router-dom";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {useEffect, useState} from "react";
+import domtoimage from 'dom-to-image';
+import { jsPDF } from "jspdf";
 
 function MapOptions(...props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [publishOpen, setPublishOpen] = React.useState(false);
+    const [downloadDialogOpen, setDownloadDialogOpen] = React.useState(false);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -35,6 +28,12 @@ function MapOptions(...props) {
     const handlePublishClose = () => {
         setPublishOpen(false);
     }
+    const handleCloseDownloadDialog = () => {
+        setDownloadDialogOpen(false);
+    };
+    const handleOpenDownloadDialog = () => {
+        setDownloadDialogOpen(true);
+    };
     return (
         <Box>
             <IconButton
@@ -54,18 +53,14 @@ function MapOptions(...props) {
                     'aria-labelledby': 'basic-button',
                 }}
             >
-                <MenuItem onClick={() => {
-                    console.log('modifying');
-                    handleClose()
-                }}>Modifier</MenuItem>
-                <MenuItem onClick={handleClose}>Supprimer</MenuItem>
+                <MenuItem onClick={() => { console.log('modifying'); handleClose() }}>Modifier</MenuItem>
                 <MenuItem onClick={handlePublish}>Publier</MenuItem>
-                <MenuItem onClick={() => {
-                    handleClose();
-                    window.open(props[0]['img'], '_blank')
-                }}>Agrandir</MenuItem>
+                <MenuItem onClick={() => { handleClose(); window.open(props[0]['img'], '_blank') }}>Agrandir</MenuItem>
+                <MenuItem onClick={handleOpenDownloadDialog}>Télécharger</MenuItem>
+                <MenuItem onClick={handleClose}>Supprimer</MenuItem>
             </Menu>
             <Popup publishOpen={publishOpen} publishClose={handlePublishClose}/>
+            <DownloadDialog mapId={props[0]['id']} downloadDialogOpen={downloadDialogOpen} handleCloseDownloadDialog={handleCloseDownloadDialog}/>
         </Box>
     )
 }
@@ -108,6 +103,66 @@ function Popup(props) {
             </DialogContent>
             <DialogActions>
                 <Button onClick={props.publishClose}>Valider</Button>
+            </DialogActions>
+        </Dialog>
+    )
+}
+
+function DownloadDialog (props) {
+    const [downloadFormat, setDownloadFormat] = React.useState('png');
+    const handleDownloadFormatChange = (event) => {
+        setDownloadFormat(event.target.value);
+    };
+    const handleDownload = () => {
+        const node = document.getElementById(props.mapId);
+        console.log(props.mapId)
+    
+        switch (downloadFormat) {
+            case 'png':
+                domtoimage.toPng(node)
+                    .then((dataUrl) => {
+                        const link = document.createElement('a');
+                        link.download = 'my-image.png';
+                        link.href = dataUrl;
+                        link.click();
+                    });
+                break;
+            case 'jpg':
+                domtoimage.toJpeg(node, { quality: 0.95 })
+                    .then((dataUrl) => {
+                        const link = document.createElement('a');
+                        link.download = 'my-image.jpg';
+                        link.href = dataUrl;
+                        link.click();
+                    });
+                break;
+            case 'pdf':
+                domtoimage.toPng(node)
+                    .then((dataUrl) => {
+                        const pdf = new jsPDF();
+                        pdf.addImage(dataUrl, 'PNG', 0, 0);
+                        pdf.save("my-document.pdf");
+                    });
+                break;
+            default:
+                break;
+        }
+    
+        props.handleCloseDownloadDialog();
+    };
+    return (
+        <Dialog open={props.downloadDialogOpen} onClose={props.handleCloseDownloadDialog}>
+            <DialogTitle style={{ color: 'black' }}>Choisir le format de téléchargement</DialogTitle>
+            <DialogContent>
+                <RadioGroup value={downloadFormat} onChange={handleDownloadFormatChange}>
+                    <FormControlLabel value="png" control={<Radio />} label="PNG" />
+                    <FormControlLabel value="jpg" control={<Radio />} label="JPG" />
+                    <FormControlLabel value="pdf" control={<Radio />} label="PDF" />
+                </RadioGroup>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={props.handleCloseDownloadDialog}>Annuler</Button>
+                <Button onClick={handleDownload}>Enregistrer</Button>
             </DialogActions>
         </Dialog>
     )
@@ -169,6 +224,7 @@ export default function MapList() {
                     {itemData.map((item) => (
                         <ImageListItem key={item.img}>
                             <img
+                                id={item.id}
                                 src={item.img}
                                 srcSet={item.img}
                                 alt={item.title}
@@ -178,7 +234,9 @@ export default function MapList() {
                                 title={item.title}
                                 subtitle={item.author}
                                 actionIcon={
-                                    <MapOptions img={item.img}/>
+                                    <div>
+                                        <MapOptions id={item.id} img={item.img}/>
+                                    </div>
                                 }
                             />
                         </ImageListItem>
