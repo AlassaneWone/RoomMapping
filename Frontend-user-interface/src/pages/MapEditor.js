@@ -3,7 +3,6 @@ import "../styles/MapEditor.css";
 import React, { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Stage, Layer, Rect, Line, Circle, Image as KonvaImage, Text } from 'react-konva';
-import useImage from 'use-image';
 import { Box, Radio, RadioGroup, FormControl, FormControlLabel, InputLabel, MenuItem,
     Select, Typography, Slider, Grid, Button, Alert, CircularProgress } from "@mui/material";
 import DrawIcon from '@mui/icons-material/Draw';
@@ -12,17 +11,6 @@ import BackspaceIcon from '@mui/icons-material/Backspace';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField } from "@mui/material";
 import { getAuth } from "firebase/auth";
-
-/**
- * Custom hook to load an image for use in a Konva stage.
- * 
- * @param {string} map - The URL or data of the image to be loaded.
- * @returns {Image} The loaded image object for use in Konva.Image.
- */
-const useMapForKonva = (map) => {
-    const [image] = useImage(map);
-    return image;
-}
 
 const MapEditor = () => {
     /**
@@ -41,8 +29,6 @@ const MapEditor = () => {
      * - text: to manage the text objects on the Konva stage.
      */
     const navigate = useNavigate();
-    const { state } = useLocation();
-    const map = useMapForKonva(state);
 
     const [stageSize, setStageSize] = useState("500x500");
 
@@ -70,6 +56,63 @@ const MapEditor = () => {
 
     const isDrawing = useRef(false);
     const layerRef = useRef(null);
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+    const uid = user.uid;
+
+    /**
+     * The stageSizeObject is an object that contains the width and height of the Konva stage.
+     */
+    const stageSizeObject = {
+        width: Number(stageSize.split('x')[0]),
+        height: Number(stageSize.split('x')[1])
+    };
+
+    /**
+     * Event handler for changing the size of the Konva stage.
+     * 
+     * @param {Event} event - The event object from the change event.
+     */
+    const handleSizeChange = (event) => {
+        setStageSize(event.target.value);
+    };
+
+    /**
+     * Custom React hook to fetch a map image and prepare it for use with Konva.
+     * @param {string} uid - The connected user ID.
+     * @param {string} mapId - The selected map ID.
+     * @returns {Object} The image object for use with Konva.
+     */
+    const useMapForKonva = (uid, mapId) => {
+        const [imageObj, setImageObj] = useState(null);
+    
+        useEffect(() => {
+            fetch(`http://localhost:5000/api/map/${uid}/maps/${mapId}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json()
+                    }
+                    throw new Error("There has been a problem with your fetch operation")
+                })
+                .then(data => {
+                    const img = new window.Image();
+                    img.crossOrigin = "anonymous";
+                    img.src = data.url;
+                    img.onload = () => {
+                        setImageObj(img);
+                    };
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }, [uid, mapId]);
+    
+        return imageObj;
+    }
+
+    const { state } = useLocation();
+    const KonvaMap = useMapForKonva(uid, state);
 
     /**
      * useEffect hook to trigger a re-render of the Konva stage whenever the lines or shapes state changes.
@@ -121,23 +164,6 @@ const MapEditor = () => {
                 setAnimLoading(false);
             });
         }
-    };
-
-    /**
-     * The stageSizeObject is an object that contains the width and height of the Konva stage.
-     */
-    const stageSizeObject = {
-        width: Number(stageSize.split('x')[0]),
-        height: Number(stageSize.split('x')[1])
-    };
-
-    /**
-     * Event handler for changing the size of the Konva stage.
-     * 
-     * @param {Event} event - The event object from the change event.
-     */
-    const handleSizeChange = (event) => {
-        setStageSize(event.target.value);
     };
 
     /**
@@ -404,7 +430,7 @@ const MapEditor = () => {
                 <Layer>
                     {/* Layer for the map */}
                     <KonvaImage 
-                        image={map}
+                        image={KonvaMap}
                         width={stageSizeObject.width}
                         height={stageSizeObject.height}
                         fill="#ffffff"

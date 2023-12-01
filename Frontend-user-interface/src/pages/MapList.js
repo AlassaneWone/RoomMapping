@@ -5,12 +5,6 @@ import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate } from "react-router-dom";
 import {grey} from '@mui/material/colors';
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import {FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@mui/material";
-import Box from "@mui/material/Box"
 import {redirect} from "react-router-dom";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {useEffect, useState} from "react";
@@ -20,7 +14,7 @@ function MapOptions(...props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [publishOpen, setPublishOpen] = React.useState(false);
     const open = Boolean(anchorEl);
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => {
@@ -35,7 +29,7 @@ function MapOptions(...props) {
     }
     const toMapEditor = () => {
         navigate('/mapEditor', {
-            state: props[0]['img']
+            state: props[0]['id']
         })
     }
     return (
@@ -73,7 +67,7 @@ function MapOptions(...props) {
 function Popup(props) {
     const [popupContent, setPopupContent] = React.useState('statique')
 
-    const handleRadioChange = (event: event) => {
+    const handleRadioChange = (event) => {
         setPopupContent(event.target.value);
     };
     const handlePlaceHolder = () => {
@@ -178,7 +172,7 @@ export default function MapList() {
                                 title={item.title}
                                 subtitle={item.author}
                                 actionIcon={
-                                    <MapOptions img={item.img}/>
+                                    <MapOptions img={item.img} id={item.id}/>
                                 }
                             />
                         </ImageListItem>
