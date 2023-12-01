@@ -1,0 +1,24 @@
+.Home {
+    text-align: center;
+    background-image: url("../assets/airsoft/outside-airsoft.jpg");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 94vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+h1 {
+    color: white;
+    font-size: 12em;
+    margin-bottom: 16px;
+}
+
+h2 {
+    color: white;
+    font-size: 3em;
+}

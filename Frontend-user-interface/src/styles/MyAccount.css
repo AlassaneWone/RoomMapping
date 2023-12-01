@@ -1,0 +1,24 @@
+.account-title {
+    text-align: center;
+    color: black;
+    font-size: 2.5rem;
+}
+
+.account-text {
+    text-align: center;
+}
+
+.account-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.button-logout, .button-delete-account {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1em;
+}
