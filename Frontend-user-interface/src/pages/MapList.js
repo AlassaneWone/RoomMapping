@@ -65,8 +65,8 @@ function MapOptions(...props) {
                     window.open(props[0]['img'], '_blank')
                 }}>Agrandir</MenuItem>
             </Menu>
-            <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['mapId']}/>
-            <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['mapId']}/>
+            <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['id']}/>
+            <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['id']}/>
         </Box>
     )
 }
@@ -195,7 +195,7 @@ export default function MapList() {
                                 title={item.title}
                                 subtitle={item.author}
                                 actionIcon={
-                                    <MapOptions img={item.img} mapId={item.id}/>
+                                    <MapOptions img={item.img} id={item.id}/>
                                 }
                             />
                         </ImageListItem>
