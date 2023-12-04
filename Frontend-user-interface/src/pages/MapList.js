@@ -1,9 +1,9 @@
 import * as React from 'react';
-import {
-    ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box,
+import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box,
     DialogActions, DialogContent, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useNavigate } from "react-router-dom";
 import {grey} from '@mui/material/colors';
 import GameList from "./GameList";
 import {redirect} from "react-router-dom";
@@ -11,11 +11,12 @@ import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {useEffect, useState} from "react";
 
 function MapOptions(...props) {
+    const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [publishOpen, setPublishOpen] = React.useState(false);
     const [matchPopupOpen, setMatchPopupOpen] = React.useState(false);
     const open = Boolean(anchorEl);
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => {
@@ -34,6 +35,12 @@ function MapOptions(...props) {
         handleClose();
     };
 
+    const toMapEditor = () => {
+        navigate('/mapEditor', {
+            state: props[0]['id']
+        })
+    }
+    
     return (
         <Box>
             <IconButton
@@ -53,10 +60,7 @@ function MapOptions(...props) {
                     'aria-labelledby': 'basic-button',
                 }}
             >
-                <MenuItem onClick={() => {
-                    console.log('modifying');
-                    handleClose()
-                }}>Modifier</MenuItem>
+                <MenuItem onClick={toMapEditor}>Modifier</MenuItem>
                 <MenuItem onClick={handleClose}>Supprimer</MenuItem>
                 <MenuItem onClick={handlePublish}>Publier</MenuItem>
                 <MenuItem onClick={handleMatchPopup}>Matchs</MenuItem>
@@ -74,7 +78,7 @@ function MapOptions(...props) {
 function Popup(props) {
     const [popupContent, setPopupContent] = React.useState('statique')
 
-    const handleRadioChange = (event: event) => {
+    const handleRadioChange = (event) => {
         setPopupContent(event.target.value);
     };
     const handlePlaceHolder = () => {
