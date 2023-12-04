@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import '../styles/GameList.css'
 import {redirect} from "react-router-dom";
+import NewGame from "./NewGame";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
@@ -11,7 +12,12 @@ const GameList = (props) => {
     const apiUrl = process.env.REACT_APP_API_URL;
     const [fetchData, setfetchData] = useState([]);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [creatingNewGame, setCreatingNewGame] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
+
+    const handleCreateGame = () => {
+        setCreatingNewGame(true);
+    };
 
     const handleDetails = () => {
         console.log(`Details for game ${selectedRow}`);
@@ -52,6 +58,8 @@ const GameList = (props) => {
 
     if (!isLoaded) {
         return <div>Loading...</div>;
+    } else if (creatingNewGame) {
+        return <NewGame onCancel={() => setCreatingNewGame(false)} mapId={props.mapId}/>;
     } else {
         return (
             <div>
@@ -66,6 +74,9 @@ const GameList = (props) => {
                             setSelectedRow={setSelectedRow}
                         />
                     </div>
+                    <button className="create-button" onClick={handleCreateGame}>
+                        Créer un nouveau match
+                    </button>
                 </div>
                 <DialogActions>
                     <Button onClick={handleDetails} disabled={isButtonDisabled}>

@@ -3,5 +3,6 @@ const express = require("express");
 const router = express.Router();
 
 router.get('/:uid/:mid', userCtrl.getGames)
+router.post('/', userCtrl.createGame)
 
 module.exports = router;
