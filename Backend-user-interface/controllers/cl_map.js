@@ -7,7 +7,7 @@ exports.getMaps = async (req, res, next) => {
         const mapsList = [];
         snapshot.forEach((doc) => {
             const gameData = doc.data();
-
+            
             mapsList.push({
                 mapId: doc.id,
                 ...gameData

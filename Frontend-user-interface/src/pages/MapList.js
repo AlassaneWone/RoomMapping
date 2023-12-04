@@ -35,6 +35,20 @@ function MapOptions(...props) {
     const handlePublishClose = () => {
         setPublishOpen(false);
     }
+    const handleMapDeletion = async () => {
+        const auth = getAuth();
+        const uid = auth.currentUser.uid;
+        const mapName = props[0]['name'];
+        const response = await fetch(`http://localhost:5000/api/delete/${uid}/${mapName}`, {
+            method: 'DELETE',
+        });
+        if (response.ok) {
+            console.log("Map Deleted Successfully");
+            window.location.reload();
+        } else {
+            console.error("Failed to delete map");
+        }
+    };
     return (
         <Box>
             <IconButton
@@ -58,7 +72,7 @@ function MapOptions(...props) {
                     console.log('modifying');
                     handleClose()
                 }}>Modifier</MenuItem>
-                <MenuItem onClick={handleClose}>Supprimer</MenuItem>
+                <MenuItem onClick={handleMapDeletion}>Supprimer</MenuItem>
                 <MenuItem onClick={handlePublish}>Publier</MenuItem>
                 <MenuItem onClick={() => {
                     handleClose();
@@ -118,7 +132,6 @@ export default function MapList() {
     const [itemData, setItemData] = useState([]);
 
     const fetchMaps = (uid) => {
-        console.log(uid)
         fetch(`http://localhost:5000/api/map/${uid}`)
             .then(response => {
                 if (response.ok) {
@@ -135,14 +148,17 @@ export default function MapList() {
     };
 
     function convertToImageListData(data) {
-        return data.map(item => ({
-            id: item.mapId,
-            img: item.url,
-            title: `Image ${item.mapId}`,
-            rows: 2,
-            cols: 2,
-            featured: true,
-        }));
+        return data.map(item => {
+            let filename = item.url.split('/').pop();
+            return {
+                id: item.mapId,
+                img: item.url,
+                filename: filename,
+                rows: 2,
+                cols: 2,
+                featured: true,
+            };
+        });
     }
 
     useEffect(() => {
@@ -171,14 +187,16 @@ export default function MapList() {
                             <img
                                 src={item.img}
                                 srcSet={item.img}
-                                alt={item.title}
+                                alt={item.filename}
                                 loading="lazy"
                             />
                             <ImageListItemBar
-                                title={item.title}
+                                title={item.filename}
                                 subtitle={item.author}
                                 actionIcon={
-                                    <MapOptions img={item.img}/>
+                                    <div>
+                                        <MapOptions img={item.img} name={item.filename}/>
+                                    </div>
                                 }
                             />
                         </ImageListItem>
