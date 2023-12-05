@@ -7,9 +7,11 @@ import MapList from "./pages/MapList";
 import Home from "./pages/Home";
 import Nav from "./pages/Nav";
 import Login from "./pages/Login";
+import Map from "./pages/Map";
 import Register from "./pages/Register";
 import MyAccount from "./pages/MyAccount";
 import MapEditor from './pages/MapEditor';
+import Zoomzoom from "./pages/Zoomzoom";
 
 function App() {
     return (
@@ -22,6 +24,7 @@ function App() {
                 <Route path="/myAccount" element={<MyAccount/>}/>
                 <Route path="/mapEditor" element={<MapEditor/>}/>
             </Route>
+            <Route path="/map" element={<Zoomzoom/>}/>
         </Routes>
     );
 }

@@ -1,23 +1,45 @@
 import * as React from 'react';
-import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box, Alert, Snackbar,
-    DialogActions, DialogContent, DialogTitle, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
+import {
+    ImageList,
+    ImageListItem,
+    ImageListItemBar,
+    ListSubheader,
+    IconButton,
+    Menu,
+    MenuItem,
+    Box,
+    Alert,
+    Snackbar,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Button,
+    Dialog,
+    FormControl,
+    FormControlLabel,
+    FormLabel,
+    Radio,
+    RadioGroup
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import {grey} from '@mui/material/colors';
 import GameList from "./GameList";
 import {redirect} from "react-router-dom";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {useEffect, useState} from "react";
-import { jsPDF } from "jspdf";
+import {jsPDF} from "jspdf";
+import DOMPurify from 'dompurify'
 
 const apiUrl = process.env.REACT_APP_API_URL;
+
 
 function MapOptions(...props) {
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [publishOpen, setPublishOpen] = React.useState(false);
     const [downloadDialogOpen, setDownloadDialogOpen] = React.useState(false);
+    const [parametresOpen, setParametresOpen] = React.useState(false);
     const open = Boolean(anchorEl);
     const [matchPopupOpen, setMatchPopupOpen] = React.useState(false);
     const [snackbarOpen, setSnackbarOpen] = React.useState(false);
@@ -85,6 +107,13 @@ function MapOptions(...props) {
             state: props[0]['mapId']
         })
     }
+    const handleParametres = () => {
+        setParametresOpen(true);
+        handleClose();
+    };
+    const handleParametresClose = () => {
+        setParametresOpen(false);
+    }
     return (
         <div>
             <Box>
@@ -106,18 +135,25 @@ function MapOptions(...props) {
                     }}
                 >
                     <MenuItem onClick={toMapEditor}>Modifier</MenuItem>
-                    <MenuItem onClick={handlePublish}>Publier</MenuItem>
+                    {!props[0].published && <MenuItem onClick={handlePublish}>Publier</MenuItem>}
+                    {props[0].published && <MenuItem onClick={handleParametres}>Parametres publication</MenuItem>}
                     <MenuItem onClick={handleMatchPopup}>Matchs</MenuItem>
-                    <MenuItem onClick={() => { handleClose(); window.open(props[0]['img'], '_blank') }}>Agrandir</MenuItem>
+                    <MenuItem onClick={() => {
+                        handleClose();
+                        window.open(props[0]['img'], '_blank')
+                    }}>Agrandir</MenuItem>
                     <MenuItem onClick={handleOpenDownloadDialog}>Télécharger</MenuItem>
                     <MenuItem onClick={handleMapDeletion}>Supprimer</MenuItem>
                 </Menu>
-                <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['id']}/>
+                <PublishPopup open={publishOpen} close={handlePublishClose} mapId={props[0].mapId}/>
+                <ParametresPopup open={parametresOpen} close={handleParametresClose} qrcode={props[0].qrcode}
+                                 mapId={props[0].mapId}/>
                 <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['id']}/>
-                <DownloadDialog mapId={props[0]['id']} downloadDialogOpen={downloadDialogOpen} handleCloseDownloadDialog={handleCloseDownloadDialog}/>
+                <DownloadDialog mapId={props[0]['id']} downloadDialogOpen={downloadDialogOpen}
+                                handleCloseDownloadDialog={handleCloseDownloadDialog}/>
             </Box>
             <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
-                <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+                <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{width: '100%'}}>
                     {snackbarMessage}
                 </Alert>
             </Snackbar>
@@ -125,50 +161,145 @@ function MapOptions(...props) {
     )
 }
 
-function Popup(props) {
-    const [popupContent, setPopupContent] = React.useState('statique')
+function PublishPopup(...props) {
+    console.log(props[0].mapId)
+    const auth = getAuth();
+    const uid = auth.currentUser.uid;
+
+    const [formData, setFormData] = React.useState({
+        type: 'static'
+    })
+
+    const handleInputChange = (event) => {
+        const {name, value} = event.target;
+        setFormData({
+            'type': value,
+        });
+    };
+
+    const handleSumbit = (event) => {
+        // event.preventDefault()
+        fetch(`http://localhost:5000/api/qrcode`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                type: formData.type,
+                mid: props[0].mapId,
+                'uid': uid
+            })
+        }).then(
+            props[0].close()
+        )
+    }
+    return (
+        <Dialog open={props[0].open} onClose={props[0].close}>
+            <DialogContent>
+                <form onSubmit={handleSumbit}>
+                    <FormLabel>Type de map</FormLabel>
+                    <RadioGroup
+                        row
+                        value={formData['type']}
+                        onChange={handleInputChange}
+                    >
+                        <FormControlLabel value="static" control={<Radio/>} label="statique"/>
+                        <FormControlLabel value="interactive" control={<Radio/>} label="interactive"/>
+                    </RadioGroup>
+                    <Button type="submit">Soumettre</Button>
+                </form>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+function ParametresPopup(...props) {
+    const [popupContent, setPopupContent] = React.useState('qrcode')
+    const [formData, setFormData] = React.useState({
+        type: 'static'
+    })
+    const auth = getAuth();
+    const uid = auth.currentUser.uid;
+
+
+    const handleMiseHorsligne = () => {
+        fetch(`http://localhost:5000/api/qrcode`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                mid: props[0].mapId,
+                'uid': uid
+            })
+        }).then(
+            props[0].close()
+        );
+    }
+
+    const handleParamSumbit = () => {
+        fetch(`http://localhost:5000/api/qrcode`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                type: formData.type,
+                mid: props[0].mapId,
+                'uid': uid
+            })
+        }).then(
+            props[0].close()
+        )
+    }
+
+    const handleInputChange = (event) => {
+        const {name, value} = event.target;
+        setFormData({
+            'type': value,
+        });
+    };
 
     const handleRadioChange = (event) => {
         setPopupContent(event.target.value);
     };
-    const handlePlaceHolder = () => {
-        console.log('placeholder function for publishing static map')
-    }
-    const handleValidate = () => {
-        console.log('validate function for publishing static map')
 
-        return (
-            <Dialog open={props.publishOpen} onClose={props.publishClose}>
-                <DialogContent>
-                    <FormControl>
-                        <FormLabel>Type de map</FormLabel>
+    return (
+        <Dialog open={props[0].open} onClose={props[0].close}>
+            <DialogContent>
+                <FormControl>
+                    <FormLabel>Type de map</FormLabel>
+                    <RadioGroup
+                        row
+                        value={popupContent}
+                        onChange={handleRadioChange}
+                    >
+                        <FormControlLabel value="qrcode" control={<Radio/>} label="qrcode"/>
+                        <FormControlLabel value="options" control={<Radio/>} label="options"/>
+                    </RadioGroup>
+                </FormControl>
+                {popupContent === 'qrcode' && <div>
+                    <p>display qrcode</p>
+                    <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(props[0].qrcode)}}></div>
+                </div>}
+                {popupContent === 'options' && <div>
+                    <form onSubmit={handleParamSumbit}>
+                        <FormLabel>parametres</FormLabel>
                         <RadioGroup
                             row
-                            value={popupContent}
-                            onChange={handleRadioChange}
+                            value={formData['type']}
+                            onChange={handleInputChange}
                         >
-                            <FormControlLabel value="statique" control={<Radio/>} label="statique"/>
-                            <FormControlLabel value="dynamique" control={<Radio/>} label="dynamique"/>
+                            <FormControlLabel value="static" control={<Radio/>} label="statique"/>
+                            <FormControlLabel value="interactive" control={<Radio/>} label="interactive"/>
                         </RadioGroup>
-                    </FormControl>
-                    {popupContent === 'statique' && <div>
-                        <p>this will publish a static map</p>
-                        <Button onClick={handlePlaceHolder}>Placeholder</Button>
-                    </div>}
-                    {popupContent === 'dynamique' && <div>
-                        <p>dynamique</p>
-                    </div>}
-                </DialogContent>
-                {popupContent !== 'group' && (
-                    <DialogActions>
-                        <Button onClick={handleValidate}>
-                            Valider
-                        </Button>
-                    </DialogActions>
-                )}
-            </Dialog>
-        )
-    }
+                        <Button type="submit">Soumettre</Button>
+                    </form>
+                    <Button onClick={handleMiseHorsligne}>Mettre hors-ligne</Button>
+                </div>}
+            </DialogContent>
+        </Dialog>
+    )
 }
 
 function MatchPopup(props) {
@@ -183,7 +314,7 @@ function MatchPopup(props) {
     );
 }
 
-function DownloadDialog (props) {
+function DownloadDialog(props) {
     const [downloadFormat, setDownloadFormat] = React.useState('png');
     const handleDownloadFormatChange = (event) => {
         setDownloadFormat(event.target.value);
@@ -193,7 +324,7 @@ function DownloadDialog (props) {
         img.crossOrigin = "anonymous";
         img.src = document.getElementById(props.mapId).src;
         console.log(img.src)
-        img.onload = function() {
+        img.onload = function () {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = this.naturalWidth;
@@ -212,8 +343,8 @@ function DownloadDialog (props) {
                 case 'pdf':
                     canvas.toBlob((blob) => {
                         const reader = new FileReader();
-                        reader.onloadend = function() {
-                            const base64data = reader.result;                
+                        reader.onloadend = function () {
+                            const base64data = reader.result;
                             const pdf = new jsPDF({
                                 orientation: canvas.width > canvas.height ? 'l' : 'p',
                                 unit: 'px',
@@ -229,25 +360,21 @@ function DownloadDialog (props) {
                     break;
             }
         };
-        img.onerror = function() {
+        img.onerror = function () {
             console.error('Could not load image');
         };
         props.handleCloseDownloadDialog();
     };
     return (
         <Dialog open={props.downloadDialogOpen} onClose={props.handleCloseDownloadDialog}>
-            <DialogTitle style={{ color: 'black' }}>Choisir le format de téléchargement</DialogTitle>
+            <DialogTitle style={{color: 'black'}}>Choisir le format de téléchargement</DialogTitle>
             <DialogContent>
                 <RadioGroup value={downloadFormat} onChange={handleDownloadFormatChange}>
-                    <FormControlLabel value="png" control={<Radio />} label="PNG" />
-                    <FormControlLabel value="jpg" control={<Radio />} label="JPG" />
-                    <FormControlLabel value="pdf" control={<Radio />} label="PDF" />
+                    <FormControlLabel value="png" control={<Radio/>} label="PNG"/>
+                    <FormControlLabel value="jpg" control={<Radio/>} label="JPG"/>
+                    <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
                 </RadioGroup>
             </DialogContent>
-            <DialogActions>
-                <Button onClick={props.handleCloseDownloadDialog}>Annuler</Button>
-                <Button onClick={handleDownload}>Enregistrer</Button>
-            </DialogActions>
         </Dialog>
     )
 }
@@ -282,6 +409,8 @@ export default function MapList() {
                 rows: 2,
                 cols: 2,
                 featured: true,
+                published: item.published,
+                qrcode: item.qrcode
             };
         });
     }
@@ -320,7 +449,8 @@ export default function MapList() {
                                 title={item.filename}
                                 subtitle={item.author}
                                 actionIcon={
-                                    <MapOptions img={item.img} id={item.id} name={item.filename} mapId={item.id}/>
+                                    <MapOptions img={item.img} published={item.published} qrcode={item.qrcode}
+                                                mapId={item.id} name={item.filename}/>
                                 }
                             />
                         </ImageListItem>
