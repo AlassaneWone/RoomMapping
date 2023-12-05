@@ -37,7 +37,7 @@ function MapOptions(...props) {
 
     const toMapEditor = () => {
         navigate('/mapEditor', {
-            state: props[0]['id']
+            state: props[0]['mapId']
         })
     }
     
@@ -69,8 +69,8 @@ function MapOptions(...props) {
                     window.open(props[0]['img'], '_blank')
                 }}>Agrandir</MenuItem>
             </Menu>
-            <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['id']}/>
-            <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['id']}/>
+            <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['mapId']}/>
+            <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['mapId']}/>
         </Box>
     )
 }
@@ -139,7 +139,6 @@ export default function MapList() {
     const [itemData, setItemData] = useState([]);
 
     const fetchMaps = (uid) => {
-        console.log(uid)
         fetch(`http://localhost:5000/api/map/${uid}`)
             .then(response => {
                 if (response.ok) {
@@ -199,7 +198,7 @@ export default function MapList() {
                                 title={item.title}
                                 subtitle={item.author}
                                 actionIcon={
-                                    <MapOptions img={item.img} id={item.id}/>
+                                    <MapOptions img={item.img} mapId={item.id}/>
                                 }
                             />
                         </ImageListItem>
