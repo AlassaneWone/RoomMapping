@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box,
+import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box, Alert, Snackbar,
     DialogActions, DialogContent, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -16,6 +16,10 @@ function MapOptions(...props) {
     const [publishOpen, setPublishOpen] = React.useState(false);
     const [matchPopupOpen, setMatchPopupOpen] = React.useState(false);
     const open = Boolean(anchorEl);
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = React.useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = React.useState('success');
+
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -29,19 +33,39 @@ function MapOptions(...props) {
     const handlePublishClose = () => {
         setPublishOpen(false);
     }
+    const handleSnackbarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setSnackbarOpen(false);
+    };
     const handleMapDeletion = async () => {
         const auth = getAuth();
         const uid = auth.currentUser.uid;
         const mapName = props[0]['name'];
-        const response = await fetch(`http://localhost:5000/api/delete/${uid}/${mapName}`, {
-            method: 'DELETE',
-        });
-        if (response.ok) {
-            console.log("Map Deleted Successfully");
-            window.location.reload();
-        } else {
-            console.error("Failed to delete map");
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/delete/${uid}/${mapName}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                setSnackbarMessage('Map Deleted Successfully');
+                setSnackbarSeverity('success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2500);
+            } else {
+                setSnackbarMessage('Failed to delete map');
+                setSnackbarSeverity('error');
+            }
+        } catch (error) {
+            console.error('Failed to fetch:', error);
+            setSnackbarMessage('Failed to delete map');
+            setSnackbarSeverity('error');
         }
+
+        setSnackbarOpen(true);
     };
     const handleMatchPopup = () => {
         setMatchPopupOpen(true);
@@ -53,36 +77,43 @@ function MapOptions(...props) {
         })
     }
     return (
-        <Box>
-            <IconButton
-                aria-controls={open ? 'basic-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? 'true' : undefined}
-                onClick={handleClick}
-            >
-                <MoreVertIcon sx={{color: grey[50]}}/>
-            </IconButton>
-            <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                MenuListProps={{
-                    'aria-labelledby': 'basic-button',
-                }}
-            >
-                <MenuItem onClick={handleMapDeletion}>Supprimer</MenuItem>
-                <MenuItem onClick={toMapEditor}>Modifier</MenuItem>
-                <MenuItem onClick={handlePublish}>Publier</MenuItem>
-                <MenuItem onClick={handleMatchPopup}>Matchs</MenuItem>
-                <MenuItem onClick={() => {
-                    handleClose();
-                    window.open(props[0]['img'], '_blank')
-                }}>Agrandir</MenuItem>
-            </Menu>
-            <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['id']}/>
-            <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['id']}/>
-        </Box>
+        <div>
+            <Box>
+                <IconButton
+                    aria-controls={open ? 'basic-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    onClick={handleClick}
+                >
+                    <MoreVertIcon sx={{color: grey[50]}}/>
+                </IconButton>
+                <Menu
+                    id="basic-menu"
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    MenuListProps={{
+                        'aria-labelledby': 'basic-button',
+                    }}
+                >
+                    <MenuItem onClick={handleMapDeletion}>Supprimer</MenuItem>
+                    <MenuItem onClick={toMapEditor}>Modifier</MenuItem>
+                    <MenuItem onClick={handlePublish}>Publier</MenuItem>
+                    <MenuItem onClick={handleMatchPopup}>Matchs</MenuItem>
+                    <MenuItem onClick={() => {
+                        handleClose();
+                        window.open(props[0]['img'], '_blank')
+                    }}>Agrandir</MenuItem>
+                </Menu>
+                <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['id']}/>
+                <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['id']}/>
+            </Box>
+            <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+                <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
+        </div>
     )
 }
 
