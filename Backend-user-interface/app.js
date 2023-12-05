@@ -7,6 +7,7 @@ const logger = require('morgan');
 require('dotenv').config()
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 
+var qrcodeRouter = require('./routes/qrcode');
 const gameRouter = require('./routes/r_game');
 const mapRouter = require('./routes/r_map');
 
@@ -31,6 +32,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/game', gameRouter);
 app.use('/api/map', mapRouter);
+app.use('/api/qrcode', qrcodeRouter);
+
 
 
 // catch 404 and forward to error handler
