@@ -6,6 +6,7 @@ import {getAuth, onAuthStateChanged} from "firebase/auth";
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const NewGame = (props) => {
+        const apiUrl = process.env.REACT_APP_API_URL;
         const [gameName, setGameName] = useState('');
         const [gameDate, setGameDate] = useState('');
         const [gameTime, setGameTime] = useState('');
@@ -95,8 +96,22 @@ const NewGame = (props) => {
                     roomId: generateRandomSessionId()
                 }))
             };
-            //Need to implement fetch to send data to backend
-            successDisplay()
+
+            fetch(`${apiUrl}/api/game`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            }).then(response => {
+                return response.json();
+            }).then(res => {
+                if (res === 201) {
+                    successDisplay();
+                } else {
+                    errorDisplay([res.errors]);
+                }
+            });
         }
 
         const successDisplay = () => {
