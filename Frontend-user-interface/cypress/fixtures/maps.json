@@ -1,0 +1,12 @@
+[
+    {
+        "mapId": "1",
+        "url": "https://roommappingbucket.s3.eu-north-1.amazonaws.com/CS-minimap.png",
+        "author": "Author 1"
+    },
+    {
+        "mapId": "2",
+        "url": "https://roommappingbucket.s3.eu-north-1.amazonaws.com/CS_cache.png",
+        "author": "Author 2"
+    }
+]
