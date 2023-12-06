@@ -90,7 +90,7 @@ const MapEditor = () => {
         const [imageObj, setImageObj] = useState(null);
     
         useEffect(() => {
-            fetch(`${apiUrl}/api/map/${uid}/maps/${mapId}`)
+            fetch(`${apiUrl}/api/map/${uid}/${mapId}`)
                 .then(response => {
                     if (response.ok) {
                         return response.json()
