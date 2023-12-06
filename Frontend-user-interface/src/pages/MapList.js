@@ -7,7 +7,6 @@ import Box from "@mui/material/Box"
 import { redirect } from "react-router-dom";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {useEffect, useState} from "react";
-import domtoimage from 'dom-to-image';
 import { jsPDF } from "jspdf";
 
 function MapOptions(...props) {
@@ -15,7 +14,7 @@ function MapOptions(...props) {
     const [publishOpen, setPublishOpen] = React.useState(false);
     const [downloadDialogOpen, setDownloadDialogOpen] = React.useState(false);
     const open = Boolean(anchorEl);
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => {
@@ -68,7 +67,7 @@ function MapOptions(...props) {
 function Popup(props) {
     const [popupContent, setPopupContent] = React.useState('statique')
 
-    const handleRadioChange = (event: event) => {
+    const handleRadioChange = (event) => {
         setPopupContent(event.target.value);
     };
     const handlePlaceHolder = () => {
@@ -114,40 +113,49 @@ function DownloadDialog (props) {
         setDownloadFormat(event.target.value);
     };
     const handleDownload = () => {
-        const node = document.getElementById(props.mapId);
-        console.log(props.mapId)
-    
-        switch (downloadFormat) {
-            case 'png':
-                domtoimage.toPng(node)
-                    .then((dataUrl) => {
-                        const link = document.createElement('a');
-                        link.download = 'my-image.png';
-                        link.href = dataUrl;
-                        link.click();
-                    });
-                break;
-            case 'jpg':
-                domtoimage.toJpeg(node, { quality: 0.95 })
-                    .then((dataUrl) => {
-                        const link = document.createElement('a');
-                        link.download = 'my-image.jpg';
-                        link.href = dataUrl;
-                        link.click();
-                    });
-                break;
-            case 'pdf':
-                domtoimage.toPng(node)
-                    .then((dataUrl) => {
-                        const pdf = new jsPDF();
-                        pdf.addImage(dataUrl, 'PNG', 0, 0);
-                        pdf.save("my-document.pdf");
-                    });
-                break;
-            default:
-                break;
-        }
-    
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = document.getElementById(props.mapId).src;
+        console.log(img.src)
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = this.naturalWidth;
+            canvas.height = this.naturalHeight;
+            ctx.drawImage(this, 0, 0);
+
+            switch (downloadFormat) {
+                case 'png':
+                case 'jpg':
+                    const format = downloadFormat === 'png' ? 'image/png' : 'image/jpeg';
+                    const link = document.createElement('a');
+                    link.download = `my-map.${downloadFormat}`;
+                    link.href = canvas.toDataURL(format);
+                    link.click();
+                    break;
+                case 'pdf':
+                    canvas.toBlob((blob) => {
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            const base64data = reader.result;                
+                            const pdf = new jsPDF({
+                                orientation: canvas.width > canvas.height ? 'l' : 'p',
+                                unit: 'px',
+                                format: [canvas.width, canvas.height]
+                            });
+                            pdf.addImage(base64data, 'JPEG', 0, 0, canvas.width, canvas.height);
+                            pdf.save("my-map.pdf");
+                        }
+                        reader.readAsDataURL(blob);
+                    }, 'image/jpeg');
+                    break;
+                default:
+                    break;
+            }
+        };
+        img.onerror = function() {
+            console.error('Could not load image');
+        };
         props.handleCloseDownloadDialog();
     };
     return (
