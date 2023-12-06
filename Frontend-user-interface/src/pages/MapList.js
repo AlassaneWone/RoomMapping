@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box, Alert, Snackbar,
-    DialogActions, DialogContent, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
+    DialogActions, DialogContent, DialogTitle, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,6 @@ function MapOptions(...props) {
     const [downloadDialogOpen, setDownloadDialogOpen] = React.useState(false);
     const open = Boolean(anchorEl);
     const [matchPopupOpen, setMatchPopupOpen] = React.useState(false);
-    const open = Boolean(anchorEl);
     const [snackbarOpen, setSnackbarOpen] = React.useState(false);
     const [snackbarMessage, setSnackbarMessage] = React.useState('');
     const [snackbarSeverity, setSnackbarSeverity] = React.useState('success');
