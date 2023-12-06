@@ -134,16 +134,20 @@ const ListeDesJeux = (props) => {
 
     return (
         <div>
-            <ul>
-                {Object.keys(props.data).map((id, index) => (
-                    <React.Fragment key={id}>
-                        {renderGameItem(id)}
-                        {index === Object.keys(props.data).length - 1 && (
-                            <li className="empty-element"/>
-                        )}
-                    </React.Fragment>
-                ))}
-            </ul>
+            {Object.keys(props.data).length === 0 ? (
+                <p className="no-matches-message">Vous n'avez pas de match.</p>
+            ) : (
+                <ul>
+                    {Object.keys(props.data).map((id, index) => (
+                        <React.Fragment key={id}>
+                            {renderGameItem(id)}
+                            {index === Object.keys(props.data).length - 1 && (
+                                <li className="empty-element"/>
+                            )}
+                        </React.Fragment>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 };
