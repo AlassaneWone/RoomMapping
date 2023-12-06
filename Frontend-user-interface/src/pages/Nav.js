@@ -54,7 +54,7 @@ export default function Nav() {
                                             Mes cartes
                                         </Button>
                                     </Link>
-                                    <Link to="/myaccount" className="Button">
+                                    <Link to="/myAccount" className="Button">
                                         <Button variant="outlined" endIcon={<AccountCircleIcon />}>
                                             Mon profil
                                         </Button>

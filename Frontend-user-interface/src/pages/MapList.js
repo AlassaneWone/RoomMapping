@@ -1,19 +1,27 @@
 import * as React from 'react';
-import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Dialog,
-    DialogActions, DialogContent, DialogTitle, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Button } from '@mui/material';
+import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box, Alert, Snackbar,
+    DialogActions, DialogContent, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
+} from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { grey } from '@mui/material/colors';
-import Box from "@mui/material/Box"
-import { redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import {grey} from '@mui/material/colors';
+import GameList from "./GameList";
+import {redirect} from "react-router-dom";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {useEffect, useState} from "react";
 import { jsPDF } from "jspdf";
 
 function MapOptions(...props) {
+    const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [publishOpen, setPublishOpen] = React.useState(false);
     const [downloadDialogOpen, setDownloadDialogOpen] = React.useState(false);
     const open = Boolean(anchorEl);
+    const [matchPopupOpen, setMatchPopupOpen] = React.useState(false);
+    const open = Boolean(anchorEl);
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = React.useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = React.useState('success');
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -33,34 +41,86 @@ function MapOptions(...props) {
     const handleOpenDownloadDialog = () => {
         setDownloadDialogOpen(true);
     };
+    const handleSnackbarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setSnackbarOpen(false);
+    };
+    const handleMapDeletion = async () => {
+        const auth = getAuth();
+        const uid = auth.currentUser.uid;
+        const mapName = props[0]['name'];
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/delete/${uid}/${mapName}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                setSnackbarMessage('Map Deleted Successfully');
+                setSnackbarSeverity('success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2500);
+            } else {
+                setSnackbarMessage('Failed to delete map');
+                setSnackbarSeverity('error');
+            }
+        } catch (error) {
+            console.error('Failed to fetch:', error);
+            setSnackbarMessage('Failed to delete map');
+            setSnackbarSeverity('error');
+        }
+
+        setSnackbarOpen(true);
+    };
+    const handleMatchPopup = () => {
+        setMatchPopupOpen(true);
+        handleClose();
+    };
+    const toMapEditor = () => {
+        navigate('/mapEditor', {
+            state: props[0]['id']
+        })
+    }
     return (
-        <Box>
-            <IconButton
-                aria-controls={open ? 'basic-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? 'true' : undefined}
-                onClick={handleClick}
-            >
-                <MoreVertIcon sx={{color: grey[50]}}/>
-            </IconButton>
-            <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                MenuListProps={{
-                    'aria-labelledby': 'basic-button',
-                }}
-            >
-                <MenuItem onClick={() => { console.log('modifying'); handleClose() }}>Modifier</MenuItem>
-                <MenuItem onClick={handlePublish}>Publier</MenuItem>
-                <MenuItem onClick={() => { handleClose(); window.open(props[0]['img'], '_blank') }}>Agrandir</MenuItem>
-                <MenuItem onClick={handleOpenDownloadDialog}>Télécharger</MenuItem>
-                <MenuItem onClick={handleClose}>Supprimer</MenuItem>
-            </Menu>
-            <Popup publishOpen={publishOpen} publishClose={handlePublishClose}/>
-            <DownloadDialog mapId={props[0]['id']} downloadDialogOpen={downloadDialogOpen} handleCloseDownloadDialog={handleCloseDownloadDialog}/>
-        </Box>
+        <div>
+            <Box>
+                <IconButton
+                    aria-controls={open ? 'basic-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    onClick={handleClick}
+                >
+                    <MoreVertIcon sx={{color: grey[50]}}/>
+                </IconButton>
+                <Menu
+                    id="basic-menu"
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    MenuListProps={{
+                        'aria-labelledby': 'basic-button',
+                    }}
+                >
+                    <MenuItem onClick={toMapEditor}>Modifier</MenuItem>
+                    <MenuItem onClick={handlePublish}>Publier</MenuItem>
+                    <MenuItem onClick={handleMatchPopup}>Matchs</MenuItem>
+                    <MenuItem onClick={() => { handleClose(); window.open(props[0]['img'], '_blank') }}>Agrandir</MenuItem>
+                    <MenuItem onClick={handleOpenDownloadDialog}>Télécharger</MenuItem>
+                    <MenuItem onClick={handleMapDeletion}>Supprimer</MenuItem>
+                </Menu>
+                <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['id']}/>
+                <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['id']}/>
+                <DownloadDialog mapId={props[0]['id']} downloadDialogOpen={downloadDialogOpen} handleCloseDownloadDialog={handleCloseDownloadDialog}/>
+            </Box>
+            <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+                <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
+        </div>
     )
 }
 
@@ -73,38 +133,53 @@ function Popup(props) {
     const handlePlaceHolder = () => {
         console.log('placeholder function for publishing static map')
     }
-    return (
-        <Dialog open={props.publishOpen} onClose={props.publishClose}>
-            <DialogContent>
-                <FormControl>
-                    <FormLabel>Type de map</FormLabel>
-                    <RadioGroup
-                        row
-                        value={popupContent}
-                        onChange={handleRadioChange}
-                    >
-                        <FormControlLabel value="statique" control={<Radio/>} label="statique"/>
-                        <FormControlLabel value="dynamique" control={<Radio/>} label="dynamique"/>
-                        <FormControlLabel value="group" control={<Radio/>} label="group"/>
-                    </RadioGroup>
-                </FormControl>
-                {popupContent === 'statique' && <div>
-                    <p>this will publish a static map</p>
-                    <Button onClick={handlePlaceHolder}>Placeholder</Button>
-                </div>}
-                {popupContent === 'dynamique' && <div>
-                    <p>dynamique</p>
-                </div>}
-                {popupContent === 'group' && <div>
-                    <p>group</p>
-                </div>}
+    const handleValidate = () => {
+        console.log('validate function for publishing static map')
 
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={props.publishClose}>Valider</Button>
-            </DialogActions>
+        return (
+            <Dialog open={props.publishOpen} onClose={props.publishClose}>
+                <DialogContent>
+                    <FormControl>
+                        <FormLabel>Type de map</FormLabel>
+                        <RadioGroup
+                            row
+                            value={popupContent}
+                            onChange={handleRadioChange}
+                        >
+                            <FormControlLabel value="statique" control={<Radio/>} label="statique"/>
+                            <FormControlLabel value="dynamique" control={<Radio/>} label="dynamique"/>
+                        </RadioGroup>
+                    </FormControl>
+                    {popupContent === 'statique' && <div>
+                        <p>this will publish a static map</p>
+                        <Button onClick={handlePlaceHolder}>Placeholder</Button>
+                    </div>}
+                    {popupContent === 'dynamique' && <div>
+                        <p>dynamique</p>
+                    </div>}
+                </DialogContent>
+                {popupContent !== 'group' && (
+                    <DialogActions>
+                        <Button onClick={handleValidate}>
+                            Valider
+                        </Button>
+                    </DialogActions>
+                )}
+            </Dialog>
+        )
+    }
+}
+
+function MatchPopup(props) {
+    const handleValidate = () => {
+        console.log('validate function for match popup');
+    };
+
+    return (
+        <Dialog open={props.open} onClose={props.onClose}>
+            <GameList mapId={props.mapId}/>
         </Dialog>
-    )
+    );
 }
 
 function DownloadDialog (props) {
@@ -181,7 +256,6 @@ export default function MapList() {
     const [itemData, setItemData] = useState([]);
 
     const fetchMaps = (uid) => {
-        console.log(uid)
         fetch(`http://localhost:5000/api/map/${uid}`)
             .then(response => {
                 if (response.ok) {
@@ -198,14 +272,17 @@ export default function MapList() {
     };
 
     function convertToImageListData(data) {
-        return data.map(item => ({
-            id: item.mapId,
-            img: item.url,
-            title: `Image ${item.mapId}`,
-            rows: 2,
-            cols: 2,
-            featured: true,
-        }));
+        return data.map(item => {
+            let filename = item.url.split('/').pop();
+            return {
+                id: item.mapId,
+                img: item.url,
+                filename: filename,
+                rows: 2,
+                cols: 2,
+                featured: true,
+            };
+        });
     }
 
     useEffect(() => {
@@ -235,16 +312,14 @@ export default function MapList() {
                                 id={item.id}
                                 src={item.img}
                                 srcSet={item.img}
-                                alt={item.title}
+                                alt={item.filename}
                                 loading="lazy"
                             />
                             <ImageListItemBar
-                                title={item.title}
+                                title={item.filename}
                                 subtitle={item.author}
                                 actionIcon={
-                                    <div>
-                                        <MapOptions id={item.id} img={item.img}/>
-                                    </div>
+                                    <MapOptions img={item.img} id={item.id} name={item.filename}/>
                                 }
                             />
                         </ImageListItem>
