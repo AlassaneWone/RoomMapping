@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box,
+import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box, Alert, Snackbar,
     DialogActions, DialogContent, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -16,6 +16,10 @@ function MapOptions(...props) {
     const [publishOpen, setPublishOpen] = React.useState(false);
     const [matchPopupOpen, setMatchPopupOpen] = React.useState(false);
     const open = Boolean(anchorEl);
+    const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+    const [snackbarMessage, setSnackbarMessage] = React.useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = React.useState('success');
+
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -29,49 +33,87 @@ function MapOptions(...props) {
     const handlePublishClose = () => {
         setPublishOpen(false);
     }
+    const handleSnackbarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
 
+        setSnackbarOpen(false);
+    };
+    const handleMapDeletion = async () => {
+        const auth = getAuth();
+        const uid = auth.currentUser.uid;
+        const mapName = props[0]['name'];
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/delete/${uid}/${mapName}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                setSnackbarMessage('Map Deleted Successfully');
+                setSnackbarSeverity('success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2500);
+            } else {
+                setSnackbarMessage('Failed to delete map');
+                setSnackbarSeverity('error');
+            }
+        } catch (error) {
+            console.error('Failed to fetch:', error);
+            setSnackbarMessage('Failed to delete map');
+            setSnackbarSeverity('error');
+        }
+
+        setSnackbarOpen(true);
+    };
     const handleMatchPopup = () => {
         setMatchPopupOpen(true);
         handleClose();
     };
-
     const toMapEditor = () => {
         navigate('/mapEditor', {
             state: props[0]['mapId']
         })
     }
-    
     return (
-        <Box>
-            <IconButton
-                aria-controls={open ? 'basic-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? 'true' : undefined}
-                onClick={handleClick}
-            >
-                <MoreVertIcon sx={{color: grey[50]}}/>
-            </IconButton>
-            <Menu
-                id="basic-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-                MenuListProps={{
-                    'aria-labelledby': 'basic-button',
-                }}
-            >
-                <MenuItem onClick={toMapEditor}>Modifier</MenuItem>
-                <MenuItem onClick={handleClose}>Supprimer</MenuItem>
-                <MenuItem onClick={handlePublish}>Publier</MenuItem>
-                <MenuItem onClick={handleMatchPopup}>Matchs</MenuItem>
-                <MenuItem onClick={() => {
-                    handleClose();
-                    window.open(props[0]['img'], '_blank')
-                }}>Agrandir</MenuItem>
-            </Menu>
-            <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['mapId']}/>
-            <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['mapId']}/>
-        </Box>
+        <div>
+            <Box>
+                <IconButton
+                    aria-controls={open ? 'basic-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                    onClick={handleClick}
+                >
+                    <MoreVertIcon sx={{color: grey[50]}}/>
+                </IconButton>
+                <Menu
+                    id="basic-menu"
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    MenuListProps={{
+                        'aria-labelledby': 'basic-button',
+                    }}
+                >
+                    <MenuItem onClick={handleMapDeletion}>Supprimer</MenuItem>
+                    <MenuItem onClick={toMapEditor}>Modifier</MenuItem>
+                    <MenuItem onClick={handlePublish}>Publier</MenuItem>
+                    <MenuItem onClick={handleMatchPopup}>Matchs</MenuItem>
+                    <MenuItem onClick={() => {
+                        handleClose();
+                        window.open(props[0]['img'], '_blank')
+                    }}>Agrandir</MenuItem>
+                </Menu>
+                <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['id']}/>
+                <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['id']}/>
+            </Box>
+            <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+                <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
+        </div>
     )
 }
 
@@ -155,14 +197,17 @@ export default function MapList() {
     };
 
     function convertToImageListData(data) {
-        return data.map(item => ({
-            id: item.mapId,
-            img: item.url,
-            title: `Image ${item.mapId}`,
-            rows: 2,
-            cols: 2,
-            featured: true,
-        }));
+        return data.map(item => {
+            let filename = item.url.split('/').pop();
+            return {
+                id: item.mapId,
+                img: item.url,
+                filename: filename,
+                rows: 2,
+                cols: 2,
+                featured: true,
+            };
+        });
     }
 
     useEffect(() => {
@@ -191,14 +236,14 @@ export default function MapList() {
                             <img
                                 src={item.img}
                                 srcSet={item.img}
-                                alt={item.title}
+                                alt={item.filename}
                                 loading="lazy"
                             />
                             <ImageListItemBar
-                                title={item.title}
+                                title={item.filename}
                                 subtitle={item.author}
                                 actionIcon={
-                                    <MapOptions img={item.img} mapId={item.id}/>
+                                    <MapOptions img={item.img} id={item.id} name={item.filename} mapId={item.id}/>
                                 }
                             />
                         </ImageListItem>
