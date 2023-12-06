@@ -7,11 +7,6 @@ const logger = require('morgan');
 require('dotenv').config()
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const uploadRouter = require('./routes/uploadFile');
-const deleteRouter = require('./routes/deleteFile');
-
 const gameRouter = require('./routes/r_game');
 const mapRouter = require('./routes/r_map');
 
@@ -33,11 +28,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.use("/api", uploadRouter);
-app.use("/api/delete", deleteRouter);
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 app.use('/api/game', gameRouter);
 app.use('/api/map', mapRouter);

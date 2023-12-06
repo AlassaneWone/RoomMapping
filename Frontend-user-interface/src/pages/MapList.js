@@ -10,6 +10,8 @@ import {redirect} from "react-router-dom";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {useEffect, useState} from "react";
 
+const apiUrl = process.env.REACT_APP_API_URL;
+
 function MapOptions(...props) {
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -46,7 +48,7 @@ function MapOptions(...props) {
         const mapName = props[0]['name'];
 
         try {
-            const response = await fetch(`http://localhost:5000/api/delete/${uid}/${mapName}`, {
+            const response = await fetch(`${apiUrl}/api/map/${uid}/${mapName}`, {
                 method: 'DELETE',
             });
             if (response.ok) {
@@ -181,7 +183,7 @@ export default function MapList() {
     const [itemData, setItemData] = useState([]);
 
     const fetchMaps = (uid) => {
-        fetch(`http://localhost:5000/api/map/${uid}`)
+        fetch(`${apiUrl}/api/map/${uid}`)
             .then(response => {
                 if (response.ok) {
                     return response.json()

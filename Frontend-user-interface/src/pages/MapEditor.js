@@ -28,6 +28,8 @@ const MapEditor = () => {
      * - shapes, shapeType, drawingShape, shapeColor: to manage the shapes drawn on the Konva stage.
      * - text: to manage the text objects on the Konva stage.
      */
+    const apiUrl = process.env.REACT_APP_API_URL;
+
     const navigate = useNavigate();
 
     const [stageSize, setStageSize] = useState("500x500");
@@ -88,7 +90,7 @@ const MapEditor = () => {
         const [imageObj, setImageObj] = useState(null);
     
         useEffect(() => {
-            fetch(`http://localhost:5000/api/map/${uid}/maps/${mapId}`)
+            fetch(`${apiUrl}/api/map/${uid}/maps/${mapId}`)
                 .then(response => {
                     if (response.ok) {
                         return response.json()
@@ -147,7 +149,7 @@ const MapEditor = () => {
             const blob = await (await fetch(dataUrl)).blob();
             const formData = new FormData();
             formData.append('file', blob, mapName + '.png');
-            fetch(`http://localhost:5000/api/${uid}/upload`, {
+            fetch(`${apiUrl}/api/map/${uid}`, {
                 method: 'POST',
                 body: formData,
             })
