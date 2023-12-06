@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box, Alert, Snackbar,
-    DialogActions, DialogContent, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
+    DialogActions, DialogContent, DialogTitle, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate } from "react-router-dom";
@@ -9,17 +9,18 @@ import GameList from "./GameList";
 import {redirect} from "react-router-dom";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import {useEffect, useState} from "react";
+import { jsPDF } from "jspdf";
 
 function MapOptions(...props) {
     const navigate = useNavigate();
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [publishOpen, setPublishOpen] = React.useState(false);
-    const [matchPopupOpen, setMatchPopupOpen] = React.useState(false);
+    const [downloadDialogOpen, setDownloadDialogOpen] = React.useState(false);
     const open = Boolean(anchorEl);
+    const [matchPopupOpen, setMatchPopupOpen] = React.useState(false);
     const [snackbarOpen, setSnackbarOpen] = React.useState(false);
     const [snackbarMessage, setSnackbarMessage] = React.useState('');
     const [snackbarSeverity, setSnackbarSeverity] = React.useState('success');
-
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -33,6 +34,12 @@ function MapOptions(...props) {
     const handlePublishClose = () => {
         setPublishOpen(false);
     }
+    const handleCloseDownloadDialog = () => {
+        setDownloadDialogOpen(false);
+    };
+    const handleOpenDownloadDialog = () => {
+        setDownloadDialogOpen(true);
+    };
     const handleSnackbarClose = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -96,17 +103,16 @@ function MapOptions(...props) {
                         'aria-labelledby': 'basic-button',
                     }}
                 >
-                    <MenuItem onClick={handleMapDeletion}>Supprimer</MenuItem>
                     <MenuItem onClick={toMapEditor}>Modifier</MenuItem>
                     <MenuItem onClick={handlePublish}>Publier</MenuItem>
                     <MenuItem onClick={handleMatchPopup}>Matchs</MenuItem>
-                    <MenuItem onClick={() => {
-                        handleClose();
-                        window.open(props[0]['img'], '_blank')
-                    }}>Agrandir</MenuItem>
+                    <MenuItem onClick={() => { handleClose(); window.open(props[0]['img'], '_blank') }}>Agrandir</MenuItem>
+                    <MenuItem onClick={handleOpenDownloadDialog}>Télécharger</MenuItem>
+                    <MenuItem onClick={handleMapDeletion}>Supprimer</MenuItem>
                 </Menu>
                 <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['id']}/>
                 <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['id']}/>
+                <DownloadDialog mapId={props[0]['id']} downloadDialogOpen={downloadDialogOpen} handleCloseDownloadDialog={handleCloseDownloadDialog}/>
             </Box>
             <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
                 <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
@@ -175,6 +181,74 @@ function MatchPopup(props) {
     );
 }
 
+function DownloadDialog (props) {
+    const [downloadFormat, setDownloadFormat] = React.useState('png');
+    const handleDownloadFormatChange = (event) => {
+        setDownloadFormat(event.target.value);
+    };
+    const handleDownload = () => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = document.getElementById(props.mapId).src;
+        console.log(img.src)
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = this.naturalWidth;
+            canvas.height = this.naturalHeight;
+            ctx.drawImage(this, 0, 0);
+
+            switch (downloadFormat) {
+                case 'png':
+                case 'jpg':
+                    const format = downloadFormat === 'png' ? 'image/png' : 'image/jpeg';
+                    const link = document.createElement('a');
+                    link.download = `my-map.${downloadFormat}`;
+                    link.href = canvas.toDataURL(format);
+                    link.click();
+                    break;
+                case 'pdf':
+                    canvas.toBlob((blob) => {
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            const base64data = reader.result;                
+                            const pdf = new jsPDF({
+                                orientation: canvas.width > canvas.height ? 'l' : 'p',
+                                unit: 'px',
+                                format: [canvas.width, canvas.height]
+                            });
+                            pdf.addImage(base64data, 'JPEG', 0, 0, canvas.width, canvas.height);
+                            pdf.save("my-map.pdf");
+                        }
+                        reader.readAsDataURL(blob);
+                    }, 'image/jpeg');
+                    break;
+                default:
+                    break;
+            }
+        };
+        img.onerror = function() {
+            console.error('Could not load image');
+        };
+        props.handleCloseDownloadDialog();
+    };
+    return (
+        <Dialog open={props.downloadDialogOpen} onClose={props.handleCloseDownloadDialog}>
+            <DialogTitle style={{ color: 'black' }}>Choisir le format de téléchargement</DialogTitle>
+            <DialogContent>
+                <RadioGroup value={downloadFormat} onChange={handleDownloadFormatChange}>
+                    <FormControlLabel value="png" control={<Radio />} label="PNG" />
+                    <FormControlLabel value="jpg" control={<Radio />} label="JPG" />
+                    <FormControlLabel value="pdf" control={<Radio />} label="PDF" />
+                </RadioGroup>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={props.handleCloseDownloadDialog}>Annuler</Button>
+                <Button onClick={handleDownload}>Enregistrer</Button>
+            </DialogActions>
+        </Dialog>
+    )
+}
 
 export default function MapList() {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -234,6 +308,7 @@ export default function MapList() {
                     {itemData.map((item) => (
                         <ImageListItem key={item.img}>
                             <img
+                                id={item.id}
                                 src={item.img}
                                 srcSet={item.img}
                                 alt={item.filename}
