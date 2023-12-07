@@ -79,6 +79,36 @@ const NewGame = (props) => {
             }
             return true
         }
+        const createSessions = async () => {
+            const sessionData = teams.map((team) => ({
+                sessId: generateRandomSessionId(),
+                url: props.url,
+            }));
+
+            try {
+                const response = await fetch(`${apiUrl}/api/session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({sessions: sessionData}),
+                });
+
+                const result = await response.json();
+
+                if (response.status === 200) {
+                    console.log("Sessions créées avec succès :", result);
+                    // Vous pouvez traiter les données de résultat ici si nécessaire
+                } else {
+                    console.log("Erreur lors de la création des sessions :", result.errors);
+                    // Vous pouvez également afficher les erreurs à l'utilisateur si nécessaire
+                }
+            } catch (error) {
+                console.error('Erreur lors de la création des sessions :', error);
+                // Traitez l'erreur selon vos besoins
+            }
+        };
+
 
         const submitForm = () => {
             const selectedDate = new Date(`${gameDate}T${gameTime}`);
@@ -86,6 +116,7 @@ const NewGame = (props) => {
             if (!dataVerificaiton()) {
                 return;
             }
+            createSessions();
             const formData = {
                 userId: userId,
                 mapId: props.mapId,
@@ -96,7 +127,6 @@ const NewGame = (props) => {
                     roomId: generateRandomSessionId()
                 }))
             };
-
             fetch(`${apiUrl}/api/game`, {
                 method: 'POST',
                 headers: {
