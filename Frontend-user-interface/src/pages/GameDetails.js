@@ -33,7 +33,6 @@ const GameDetails = (props) => {
             })
             .then(data => {
                 setfetchData(data);
-                console.log(data);
                 setIsLoaded(true)
             }).catch((error) => {
             console.log('error: ' + error);

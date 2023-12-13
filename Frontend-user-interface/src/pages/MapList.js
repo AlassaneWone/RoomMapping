@@ -113,7 +113,7 @@ function MapOptions(...props) {
                     <MenuItem onClick={handleMapDeletion}>Supprimer</MenuItem>
                 </Menu>
                 <Popup publishOpen={publishOpen} publishClose={handlePublishClose} mapId={props[0]['id']}/>
-                <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['id']}/>
+                <MatchPopup open={matchPopupOpen} onClose={() => setMatchPopupOpen(false)} mapId={props[0]['id']} url={props[0]['img']}/>
                 <DownloadDialog mapId={props[0]['id']} downloadDialogOpen={downloadDialogOpen} handleCloseDownloadDialog={handleCloseDownloadDialog}/>
             </Box>
             <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
@@ -178,7 +178,7 @@ function MatchPopup(props) {
 
     return (
         <Dialog open={props.open} onClose={props.onClose}>
-            <GameList mapId={props.mapId}/>
+            <GameList mapId={props.mapId} url={props.url}/>
         </Dialog>
     );
 }

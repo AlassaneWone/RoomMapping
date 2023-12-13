@@ -63,11 +63,16 @@ const GameList = (props) => {
     if (!isLoaded) {
         return <div>Loading...</div>;
     } else if (creatingNewGame) {
+<<<<<<< HEAD
         return <NewGame onCancel={() => setCreatingNewGame(false)} mapId={props.mapId}/>;
     } else if(gameDetails) {
         return <GameDetails onCancel={() => setGameDetails(false)} gameId={fetchData[selectedRow].gameId} mapId={props.mapId}/>;
     }
     else {
+=======
+        return <NewGame onCancel={() => setCreatingNewGame(false)} mapId={props.mapId} url={props.url}/>;
+    } else {
+>>>>>>> E-Client
         return (
             <div>
                 <div className="header">

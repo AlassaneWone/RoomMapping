@@ -16,7 +16,7 @@ exports.getMaps = async (req, res, next) => {
 
         res.status(200).json(mapsList);
     } catch (error) {
-        console.error('Erreur lors de la récupération des parties :', error);
+        console.error('Erreur lors de la récupération des cartes :', error);
         res.status(500).send('Internal Server Error');
     }
 };
