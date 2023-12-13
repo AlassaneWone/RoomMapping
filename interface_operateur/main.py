@@ -2,7 +2,6 @@ from tkinter import *
 from tkinter.ttk import *
 
 # Tabs
-from tabs.exampleTab import ExampleTab
 from tabs.radarTab import RadarTab
 from tabs.homeTab import HomeTab
 from tabs.uploadTab import UploadTab
@@ -25,7 +24,6 @@ root.geometry("600x600")
 tabControl = Notebook(root)
 home = HomeTab(tabControl)
 radar = RadarTab(tabControl)
-example = ExampleTab(tabControl)
 upload = UploadTab(tabControl)
 tabControl.pack(expand=1, fill="both")
 
@@ -33,7 +31,6 @@ tabControl.pack(expand=1, fill="both")
 # Créer un menu en haut
 menubar = Menu(root)
 root.config(menu=menubar)
-
 filemenu = Menu(menubar, tearoff=0)
 menubar.add_cascade(label="File", menu=filemenu)
 filemenu.add_command(label="New", command=donothing)
