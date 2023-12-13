@@ -1,6 +1,8 @@
 .Zoomzoom {
     font-family: sans-serif;
     text-align: center;
+    margin: 0;  /* Ajoutez cette ligne pour éliminer la marge */
+    padding: 0; /* Ajoutez cette ligne pour éliminer le rembourrage */
 }
 
 .containerStyle {
@@ -9,4 +11,26 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
+    width: 100%;
+}
+
+img {
+    width: 100%;
+    height: auto;
+}
+
+.react-transform-component.transform-component-module_content__FBWxo {
+    width: 100vw; /* 100% de la largeur de la vue (viewport) */
+    height: 100vh; /* 100% de la hauteur de la vue (viewport) */
+    overflow: hidden; /* Empêche le contenu de déborder */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.react-transform-component.transform-component-module_content__FBWxo img {
+    width: auto; /* Ajuste la largeur proportionnellement à la hauteur */
+    height: auto; /* Ajuste la hauteur proportionnellement à la largeur */
+    max-width: 100%; /* Garantit que l'image ne dépasse pas la largeur du conteneur */
+    max-height: 100%; /* Garantit que l'image ne dépasse pas la hauteur du conteneur */
 }
