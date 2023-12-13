@@ -7,6 +7,11 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as colors
 
+import asyncio
+import websockets
+import json
+import threading as th
+
 from .mock2 import data
 
 #Parametre pour l'affichage
@@ -14,6 +19,7 @@ NOMBRE_DE_PAQUET_AFFICHE = 35
 MIN_CMAP = 0
 MAX_CMAP = 250
 TAILLE_POINTS = 5.0
+TAILLE = 3000
 
 class RadarTab:
     def __init__(self,tabControl):
@@ -36,10 +42,11 @@ class RadarTab:
     
         self.all_x,self.all_y, self.all_confiance = [],[],[]
         self.en_cours_execution = False
+        #self.connexion_websocket = websockets.connect('ws://192.168.137.1:8000')
 
         self.fig= Figure()
         self.axe = self.fig.add_subplot(projection = 'polar')
-        self.axe.set_ylim(bottom=0,top=6000)
+        self.axe.set_ylim(bottom=0,top=TAILLE)
         
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame_1) 
         self.canvas_widget = self.canvas.get_tk_widget()
@@ -65,39 +72,19 @@ class RadarTab:
         Button(self.frame_2_3, text="Désactiver", command= self.desactiver_radar).pack(fill="both",side="left",expand=True)
         Button(self.frame_2_3, text="Clear", command= self.clear_radar).pack(fill="both",side="left",expand=True)
     
-
     def clear_radar(self):
         self.all_x, self.all_y, self.all_confiance = [],[],[]
         self.axe.clear()
-        self.axe.set_ylim(0,6000)
+        self.axe.set_ylim(0,TAILLE)
         self.canvas.draw()
         self.frame_0.update()
 
-    def desactiver_radar(self):
-        self.en_cours_execution = False
-        self.label_activation_radar.config(text="Désactiver", background="#E93030", font= "#000000")
-        self.axe.scatter(x =self.all_x,y = self.all_y,c= self.all_confiance, s=TAILLE_POINTS,cmap=self.custom_cmap,vmin=MIN_CMAP,vmax=MAX_CMAP)
-        self.axe.set_ylim(0,6000)
-        self.canvas.draw()
-        self.frame_0.update()
-    
-    def activer_radar(self):
-        self.en_cours_execution = True
-        self.label_activation_radar.config(text="Activer",background="#49CC1F", font= "#000000")
-        self.test()
-        self.axe.set_ylim(0,6000)
-        self.canvas.draw()
-        self.frame_0.update()
-
-    def test(self):
-            for i in data:
-                self.actualisation_radar(i)
 
     def actualisation_radar(self,paquet):
         plt.pause(0.0001)
         if self.en_cours_execution == True:
             self.axe.clear()
-            for i in paquet["dataPoints"]:
+            for i in paquet:
                 self.label_1 .configure(text="La distance " +str(int(i[1])) +", l'angle " +str(int(i[0])))
                 self.all_x.append(np.radians(i[1]))
                 self.all_y.append(i[0])
@@ -107,6 +94,43 @@ class RadarTab:
                     self.all_y.pop(0)
                     self.all_confiance.pop(0)
             self.axe.scatter(x =self.all_x,y = self.all_y,c= self.all_confiance, s=TAILLE_POINTS,cmap=self.custom_cmap,vmin=MIN_CMAP,vmax=MAX_CMAP)
-            self.axe.set_ylim(0,6000)
+            self.axe.set_ylim(0,TAILLE)
             self.canvas.draw()
             self.frame_0.update()
+
+    def packet_thread(self):
+        fred=th.Thread(target=self.boocle)
+        fred.start()
+        
+    def boocle(self):
+        while(self.en_cours_execution):
+            asyncio.run(self.websocket_data())
+            #plt.pause(0.001)
+
+    async def websocket_data(self):
+        async with websockets.connect('ws://192.168.137.1:8000') as websocket:
+            await websocket.send("coucou")
+            dataPoints = await websocket.recv()
+            self.actualisation_radar(json.loads(dataPoints))
+
+
+    def desactiver_radar(self):
+        self.en_cours_execution = False
+        self.label_activation_radar.config(text="Désactiver", background="#E93030", font= "#000000")
+        self.axe.scatter(x =self.all_x,y = self.all_y,c= self.all_confiance, s=TAILLE_POINTS,cmap=self.custom_cmap,vmin=MIN_CMAP,vmax=MAX_CMAP)
+        self.axe.set_ylim(0,TAILLE)
+        self.canvas.draw()
+        self.frame_0.update()
+    
+    def activer_radar(self):
+        self.en_cours_execution = True
+        self.label_activation_radar.config(text="Activer",background="#49CC1F", font= "#000000")
+        self.packet_thread()
+        self.axe.set_ylim(0,TAILLE)
+        self.canvas.draw()
+        self.frame_0.update()
+
+    def test(self):
+            for i in data:
+                self.actualisation_radar(i)
+
