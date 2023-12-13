@@ -9,7 +9,7 @@ import Nav from "./pages/Nav";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MyAccount from "./pages/MyAccount";
-import Zoomzoom from "./pages/Zoomzoom";
+import Zoom from "./pages/Zoom";
 
 function App() {
     return (
@@ -21,7 +21,7 @@ function App() {
                 <Route path="/register" element={<Register/>}/>
                 <Route path="/myaccount" element={<MyAccount/>}/>
             </Route>
-            <Route path="/zoom" element={<Zoomzoom/>}/>
+            <Route path="/zoom" element={<Zoom/>}/>
         </Routes>
     );
 }
