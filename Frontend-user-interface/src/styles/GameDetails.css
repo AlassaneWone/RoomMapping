@@ -1,0 +1,68 @@
+.game-details {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.game-details h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.game-info p {
+    margin: 0;
+}
+
+.teams h2 {
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+.teams ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.teams li {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+.team-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.team-room-id {
+    margin-left: auto; /* assure que l'ID est toujours à droite */
+}
+
+.team-room-id {
+    cursor: pointer; /* Change le curseur en un pointeur pour indiquer la cliquabilité */
+    transition: color 0.3s, transform 0.3s; /* Transition douce pour les changements de style */
+}
+
+.team-room-id:hover {
+    color: #007bff; /* Change la couleur au survol */
+    text-decoration: underline; /* Souligne le texte au survol */
+    transform: scale(1.1); /* Légèrement plus grand au survol */
+}
+
+.copy-success-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+    background-color: green;
+    color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+

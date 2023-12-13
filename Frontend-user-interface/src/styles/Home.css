@@ -12,13 +12,13 @@
     overflow: hidden;
 }
 
-h1 {
+.home-h1 {
     color: white;
     font-size: 12em;
     margin-bottom: 16px;
 }
 
-h2 {
+.home-h2 {
     color: white;
     font-size: 3em;
 }

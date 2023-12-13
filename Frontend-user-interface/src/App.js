@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import MyAccount from "./pages/MyAccount";
 import Zoom from "./pages/Zoom";
+import MapEditor from './pages/MapEditor';
 
 function App() {
     return (
@@ -19,7 +20,8 @@ function App() {
                 <Route path="/maplist" element={<MapList/>}/>
                 <Route path="/login" element={<Login/>}/>
                 <Route path="/register" element={<Register/>}/>
-                <Route path="/myaccount" element={<MyAccount/>}/>
+                <Route path="/myAccount" element={<MyAccount/>}/>
+                <Route path="/mapEditor" element={<MapEditor/>}/>
             </Route>
             <Route path="/zoom" element={<Zoom/>}/>
         </Routes>

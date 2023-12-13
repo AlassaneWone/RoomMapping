@@ -1,0 +1,85 @@
+.new-game-container {
+    width: 400px;
+    max-width: 400px;
+    margin: 20px;
+    border-radius: 10px;
+    overflow-y: auto;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.team-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    margin-right: 5px;
+    box-sizing: border-box;
+}
+
+.remove-button {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.remove-button:hover {
+    background-color: #c9302c;
+}
+
+.remove-button.disabled {
+    background-color: #e6e6e6;
+    cursor: not-allowed;
+    color: #999999;
+}
+
+.back-button {
+    background-color: #91bdd3;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin: auto;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.errors {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #f2dede;
+    display: none;
+    color: red;
+    width: 380px; /* Fixer la largeur maximale pour les messages d'erreur */
+}
+
+.success {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #dff0d8;
+    display: none;
+    color: green;
+    width: 380px; /* Fixer la largeur maximale pour les messages de succès */
+}
+
+.addTeamButton {
+    background-color: #91bdd3;
+    color: black;
+    border: none;
+    padding: 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}

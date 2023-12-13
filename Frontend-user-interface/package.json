@@ -8,23 +8,36 @@
     "@mui/icons-material": "^5.14.16",
     "@mui/material": "^5.14.17",
     "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "bootstrap": "^5.3.2",
+    "canvas": "^2.11.2",
+    "dom-to-image": "^2.6.0",
     "firebase": "^10.6.0",
+    "jest": "^27.5.1",
+    "jsdom": "^22.1.0",
+    "jspdf": "^2.5.1",
+    "konva": "^9.2.3",
+    "net": "^1.0.2",
+    "path-browserify": "^1.0.1",
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.1",
+    "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.2.0",
+    "react-konva": "^18.2.10",
     "react-router-dom": "^6.18.0",
     "react-scripts": "5.0.1",
     "react-spring": "^9.7.3",
     "react-zoom-pan-pinch": "^3.3.0",
+    "tls": "^0.0.1",
+    "url": "^0.11.3",
+    "use-image": "^1.1.1",
+    "util": "^0.12.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "jest",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -44,5 +57,16 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.23.3",
+    "@babel/preset-react": "^7.23.3",
+    "@testing-library/react": "^14.1.2",
+    "babel-jest": "^29.7.0",
+    "firebase-mock": "^2.3.2",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^27.5.1",
+    "jsdom": "^23.0.0",
+    "react-test-renderer": "^18.2.0"
   }
 }
