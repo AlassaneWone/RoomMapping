@@ -1,4 +1,4 @@
-import crc8
+# import crc8\
 
 
 class LidarData:
@@ -64,8 +64,5 @@ if __name__ == '__main__':
     testData = """54 2C 68 08 AB 7E E0 00 E4 DC 00 E2 D9 00 E5 D5 00 E3 D3 00 E4 D0 00 E9 CD 00 E4 CA 00 E2 C7 00 E9 C5 00 E5 C2 00 E5 C0 00 E5 BE 82 3A 1A 50"""
     l = LidarData(testData)
 
-    hash_browns = crc8.crc8()
-    hash_browns.update(testData.join(""))
-
-    print(hash_browns.hexdigest())
+    print()
 
