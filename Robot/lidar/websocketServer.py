@@ -5,7 +5,7 @@ import json
 from lidarData import LidarData
 
 # create handler for each connection
-ser = serial.Serial(port='COM4',
+ser = serial.Serial(port='/dev/ttyUSB0',
                     baudrate=230400,
                     timeout=5.0,
                     bytesize=8,
@@ -31,7 +31,7 @@ async def handler(websocket, path):
         await websocket.send(reply)
 
 
-start_server = websockets.serve(handler, "192.168.137.1", 8000)
+start_server = websockets.serve(handler, "192.168.141.142", 8000)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 
