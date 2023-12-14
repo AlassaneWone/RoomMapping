@@ -149,6 +149,9 @@ const NewGame = (props) => {
             document.getElementsByClassName("errors")[0].style.display = "none";
             document.getElementsByClassName("success")[0].style.display = "block";
             resetForm();
+            if (props.onGameAdded) {
+                props.onGameAdded();
+            }
         };
 
         const errorDisplay = (errors) => {

@@ -16,6 +16,7 @@ const GameList = (props) => {
     const [creatingNewGame, setCreatingNewGame] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
     const [gameDetails, setGameDetails] = useState(null);
+    const [gameAdded, setGameAdded] = useState(false);
 
     const handleCreateGame = () => {
         setCreatingNewGame(true);
@@ -49,12 +50,12 @@ const GameList = (props) => {
             if (user) {
                 const uid = user.uid;
                 fetchGames(uid);
-
             } else {
                 redirect('/login');
             }
         });
-    }, []);
+        setGameAdded(false);
+    }, [gameAdded]); 
 
     const buttonText = selectedRow ? "Détails" : "Aucun match Sélectionné";
 
@@ -63,7 +64,7 @@ const GameList = (props) => {
     if (!isLoaded) {
         return <div>Loading...</div>;
     } else if (creatingNewGame) {
-        return <NewGame onCancel={() => setCreatingNewGame(false)} mapId={props.mapId} url={props.url}/>;
+        return <NewGame onCancel={() => setCreatingNewGame(false)} mapId={props.mapId} url={props.url} onGameAdded={() => setGameAdded(true)}/>;
     } else if(gameDetails) {
         return <GameDetails onCancel={() => setGameDetails(false)} gameId={fetchData[selectedRow].gameId} mapId={props.mapId}/>;
     }

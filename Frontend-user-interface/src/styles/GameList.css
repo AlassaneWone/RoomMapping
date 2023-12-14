@@ -77,8 +77,7 @@ ul {
 
 .create-button {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
+    bottom: 15px;   
     background-color: #91bdd3;
     color: black;
     padding: 10px;
@@ -86,12 +85,14 @@ ul {
     border-radius: 5px;
     cursor: pointer;
     font-size: 15px;
-font-weight: bold;
+    font-weight: bold;
 }
 
 .games-container {
     position: relative;
     margin: auto;
+    display: flex;
+    justify-content: center;
 }
 .empty-element {
     height: 54px; /* Adjust the height as needed to match your button's height */
