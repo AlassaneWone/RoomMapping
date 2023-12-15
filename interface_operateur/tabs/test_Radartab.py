@@ -38,6 +38,28 @@ class TestRadarTab(unittest.TestCase):
         # Assert that the radar_size is unchanged after enregistrement
         self.assertEqual(self.radar_tab.radar_size, TAILLE_RADAR)
 
+    def test_actualiser_radar_size(self):
+        self.radar_tab.actualiser_radar_size(8000)
+        self.assertEqual(self.radar_tab.radar_size, 8000)
+            # Test with a larger radar size
+        self.radar_tab.actualiser_radar_size(12000)
+        self.assertEqual(self.radar_tab.radar_size, 12000)
+
+        # Test with a smaller radar size
+        self.radar_tab.actualiser_radar_size(4000)
+        self.assertEqual(self.radar_tab.radar_size, 4000)
+
+        # Test with a size between 4000 and 6000
+        self.radar_tab.actualiser_radar_size(5000)
+        self.assertEqual(self.radar_tab.radar_size, 5000)
+
+        # Test with the minimum allowed size
+        self.radar_tab.actualiser_radar_size(1000)
+        self.assertEqual(self.radar_tab.radar_size, 1000)
+
+        #Test the behavior when setting the size to a negative value
+        with self.assertRaises(ValueError):
+            self.radar_tab.actualiser_radar_size(-100)
 
     def test_actualisation_radar(self):
         paquet = [[4500, 100, 200]]
