@@ -1,5 +1,6 @@
 from tkinter import *
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import filedialog
 import numpy as np
 from matplotlib.figure import Figure
 import tkinter.ttk as ttk
@@ -11,8 +12,6 @@ import asyncio
 import websockets
 import json
 import threading as th
-
-from .mock2 import data
 
 #Parametre pour l'affichage
 NOMBRE_DE_PAQUET_AFFICHE = 35
@@ -33,18 +32,21 @@ class RadarTab:
         self.frame_2_1 = LabelFrame(self.frame_2, bg='lightgray')
         self.frame_2_2 = LabelFrame(self.frame_2,height=100, bg = 'lightgray')
         self.frame_2_3 = LabelFrame(self.frame_2,height=100, bg = 'lightgray')
+        self.frame_2_4 = LabelFrame(self.frame_2,height=100, bg = 'lightgray')
 
         self.frame_1.pack(side="left" ,fill="both",expand=TRUE,padx=10,pady=10)
         self.frame_2.pack(side="left",fill="both",expand=TRUE,padx=10,pady=10)
         self.frame_2_1.pack(side="top" ,fill="both",expand=TRUE,padx=10,pady=10)
         self.frame_2_2.pack(side="top",fill="x",expand=False,padx=10)
-        self.frame_2_3.pack(side="bottom",fill="x",expand=False,padx=10,pady=[0,10])
+        self.frame_2_3.pack(side="top",fill="x",expand=False,padx=10)
+        self.frame_2_4.pack(side="bottom",fill="x",expand=False,padx=10,pady=[0,10])
     
         self.all_x,self.all_y, self.all_confiance = [],[],[]
         self.en_cours_execution = False
         #self.connexion_websocket = websockets.connect('ws://192.168.137.1:8000')
 
         self.fig= Figure()
+        self.fig_copy = self.fig
         self.axe = self.fig.add_subplot(projection = 'polar')
         self.axe.set_ylim(bottom=0,top=TAILLE)
         
@@ -59,10 +61,9 @@ class RadarTab:
             'green': [(0.0, 0.16, 0.16), (1.0, 0.70, 0.70)],
             'blue':  [(0.0, 0.16, 0.16), (1.0, 0.17, 0.17)]
             }, N=256)
-
         self.mappable = cm.ScalarMappable(norm=colors.Normalize(MIN_CMAP, MAX_CMAP), cmap=self.custom_cmap)
-        self.fig.colorbar(self.mappable, ax=self.axe, orientation='horizontal', pad=0.1,shrink=1, aspect=30,label="Confiance", ticks=[0,125, 250])
-
+        self.colorbar = self.fig.colorbar(self.mappable, ax=self.axe, orientation='horizontal', pad=0.1,shrink=1, aspect=30,label="Confiance", ticks=[0,125, 250])
+        
         self.label_1 = Label(self.frame_2_1,text="La distance ,l'angle " )
         self.label_1.pack(expand=True)
 
@@ -71,15 +72,18 @@ class RadarTab:
         Button(self.frame_2_3, text="Activer", command= self.activer_radar).pack(fill="both",side="left",expand=True)
         Button(self.frame_2_3, text="Désactiver", command= self.desactiver_radar).pack(fill="both",side="left",expand=True)
         Button(self.frame_2_3, text="Clear", command= self.clear_radar).pack(fill="both",side="left",expand=True)
-    
-    def clear_radar(self):
-        self.all_x, self.all_y, self.all_confiance = [],[],[]
-        self.axe.clear()
-        self.axe.set_ylim(0,TAILLE)
-        self.canvas.draw()
-        self.frame_0.update()
+        Button(self.frame_2_4,text="Enregistrer", command=self.enregistrer_image).pack(fill="both",side="top",expand=True)
 
+# Enregistrer une image du radar
+    def enregistrer_image(self):
+        figure = self.fig_copy
+        file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("Fichiers PNG", "*.png")])
+        if not file_path:
+            return
+        figure.savefig(file_path, format="png",dpi=500)
+        print("Enregistrer")
 
+# Actualisation des données du radar
     def actualisation_radar(self,paquet):
         plt.pause(0.0001)
         if self.en_cours_execution == True:
@@ -94,10 +98,9 @@ class RadarTab:
                     self.all_y.pop(0)
                     self.all_confiance.pop(0)
             self.axe.scatter(x =self.all_x,y = self.all_y,c= self.all_confiance, s=TAILLE_POINTS,cmap=self.custom_cmap,vmin=MIN_CMAP,vmax=MAX_CMAP)
-            self.axe.set_ylim(0,TAILLE)
-            self.canvas.draw()
-            self.frame_0.update()
+            self.update_display()
 
+# Partie Websocket
     def packet_thread(self):
         fred=th.Thread(target=self.boocle)
         fred.start()
@@ -105,32 +108,37 @@ class RadarTab:
     def boocle(self):
         while(self.en_cours_execution):
             asyncio.run(self.websocket_data())
-            #plt.pause(0.001)
 
     async def websocket_data(self):
-        async with websockets.connect('ws://192.168.137.1:8000') as websocket:
-            await websocket.send("coucou")
-            dataPoints = await websocket.recv()
-            self.actualisation_radar(json.loads(dataPoints))
+        try:
+            async with websockets.connect('ws://192.168.137.1:8000') as websocket:
+                await websocket.send("coucou")
+                dataPoints = await websocket.recv()
+                self.actualisation_radar(json.loads(dataPoints))
+        except:
+            pass
 
-
+# Partie activation et désactivition du radar
     def desactiver_radar(self):
         self.en_cours_execution = False
         self.label_activation_radar.config(text="Désactiver", background="#E93030", font= "#000000")
         self.axe.scatter(x =self.all_x,y = self.all_y,c= self.all_confiance, s=TAILLE_POINTS,cmap=self.custom_cmap,vmin=MIN_CMAP,vmax=MAX_CMAP)
-        self.axe.set_ylim(0,TAILLE)
-        self.canvas.draw()
-        self.frame_0.update()
-    
+        self.update_display()
+
     def activer_radar(self):
         self.en_cours_execution = True
         self.label_activation_radar.config(text="Activer",background="#49CC1F", font= "#000000")
         self.packet_thread()
+        self.update_display()
+
+    def clear_radar(self):
+        self.all_x, self.all_y, self.all_confiance = [],[],[]
+        self.axe.clear()
+        self.update_display()
+
+#Update du display
+    def update_display(self):
         self.axe.set_ylim(0,TAILLE)
         self.canvas.draw()
         self.frame_0.update()
-
-    def test(self):
-            for i in data:
-                self.actualisation_radar(i)
 
