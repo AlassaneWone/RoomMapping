@@ -1,5 +1,26 @@
 const {db} = require('../db.js');
 
+exports.getGame = async (req, res) => {
+    try {
+        const gameDocument = db.doc(`users/${req.params.uid}/maps/${req.params.mid}/games/${req.params.gid}`);
+        const snapshot = await gameDocument.get();
+
+        if (!snapshot.exists) {
+            res.status(404).send('Game not found');
+        } else {
+            const gameData = snapshot.data();
+
+            res.status(200).json({
+                gameId: snapshot.id,
+                ...gameData
+            });
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération du match :', error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+
 exports.getGames = async (req, res) => {
     console.log("Called")
     try {

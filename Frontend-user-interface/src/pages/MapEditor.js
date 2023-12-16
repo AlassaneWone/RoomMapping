@@ -90,7 +90,7 @@ const MapEditor = () => {
         const [imageObj, setImageObj] = useState(null);
     
         useEffect(() => {
-            fetch(`${apiUrl}/api/map/${uid}/${mapId}`)
+            fetch(`${apiUrl}api/map/${uid}/${mapId}`)
                 .then(response => {
                     if (response.ok) {
                         return response.json()
@@ -149,7 +149,7 @@ const MapEditor = () => {
             const blob = await (await fetch(dataUrl)).blob();
             const formData = new FormData();
             formData.append('file', blob, mapName + '.png');
-            fetch(`${apiUrl}/api/map/${uid}`, {
+            fetch(`${apiUrl}api/map/${uid}`, {
                 method: 'POST',
                 body: formData,
             })

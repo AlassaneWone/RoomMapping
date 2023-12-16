@@ -1,25 +1,6 @@
 import * as React from 'react';
-import {
-    ImageList,
-    ImageListItem,
-    ImageListItemBar,
-    ListSubheader,
-    IconButton,
-    Menu,
-    MenuItem,
-    Box,
-    Alert,
-    Snackbar,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Button,
-    Dialog,
-    FormControl,
-    FormControlLabel,
-    FormLabel,
-    Radio,
-    RadioGroup
+import { ImageList, ImageListItem, ImageListItemBar, ListSubheader, IconButton, Menu, MenuItem, Box, Alert, Snackbar,
+    DialogActions, DialogContent, DialogTitle, Button, Dialog, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import {useNavigate} from "react-router-dom";
@@ -77,7 +58,7 @@ function MapOptions(...props) {
         const mapName = props[0]['name'];
 
         try {
-            const response = await fetch(`${apiUrl}/api/map/${uid}/${mapName}`, {
+            const response = await fetch(`${apiUrl}api/map/${uid}/${mapName}`, {
                 method: 'DELETE',
             });
             if (response.ok) {
@@ -309,7 +290,7 @@ function MatchPopup(props) {
 
     return (
         <Dialog open={props.open} onClose={props.onClose}>
-            <GameList mapId={props.mapId}/>
+            <GameList mapId={props.mapId} url={props.url}/>
         </Dialog>
     );
 }
@@ -375,6 +356,10 @@ function DownloadDialog(props) {
                     <FormControlLabel value="pdf" control={<Radio/>} label="PDF"/>
                 </RadioGroup>
             </DialogContent>
+            <DialogActions>
+                <Button onClick={props.handleCloseDownloadDialog}>Annuler</Button>
+                <Button onClick={handleDownload}>Enregistrer</Button>
+            </DialogActions>
         </Dialog>
     )
 }
@@ -384,7 +369,7 @@ export default function MapList() {
     const [itemData, setItemData] = useState([]);
 
     const fetchMaps = (uid) => {
-        fetch(`${apiUrl}/api/map/${uid}`)
+        fetch(`${apiUrl}api/map/${uid}`)
             .then(response => {
                 if (response.ok) {
                     return response.json()

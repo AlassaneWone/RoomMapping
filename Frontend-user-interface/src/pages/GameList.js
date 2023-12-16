@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import '../styles/GameList.css'
 import {redirect} from "react-router-dom";
 import NewGame from "./NewGame";
+import GameDetails from "./GameDetails";
 import Button from "@mui/material/Button";
 import DialogActions from "@mui/material/DialogActions";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
@@ -14,17 +15,19 @@ const GameList = (props) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [creatingNewGame, setCreatingNewGame] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
+    const [gameDetails, setGameDetails] = useState(null);
 
     const handleCreateGame = () => {
         setCreatingNewGame(true);
     };
 
     const handleDetails = () => {
-        console.log(`Details for game ${selectedRow}`);
+        setGameDetails(true)
+        console.log(`Details for game ${fetchData[selectedRow].gameId}`);
     };
 
     const fetchGames = (uid) => {
-        fetch(`${apiUrl}/api/game/${uid}/${props.mapId}`)
+        fetch(`${apiUrl}api/game/${uid}/${props.mapId}`)
             .then(response => {
                 if (response.ok) {
                     return response.json()
@@ -33,6 +36,7 @@ const GameList = (props) => {
             })
             .then(data => {
                 setfetchData(data);
+                console.log(data);
                 setIsLoaded(true)
             }).catch((error) => {
             console.log('error: ' + error);
@@ -59,8 +63,11 @@ const GameList = (props) => {
     if (!isLoaded) {
         return <div>Loading...</div>;
     } else if (creatingNewGame) {
-        return <NewGame onCancel={() => setCreatingNewGame(false)} mapId={props.mapId}/>;
-    } else {
+        return <NewGame onCancel={() => setCreatingNewGame(false)} mapId={props.mapId} url={props.url}/>;
+    } else if(gameDetails) {
+        return <GameDetails onCancel={() => setGameDetails(false)} gameId={fetchData[selectedRow].gameId} mapId={props.mapId}/>;
+    }
+    else {
         return (
             <div>
                 <div className="header">
