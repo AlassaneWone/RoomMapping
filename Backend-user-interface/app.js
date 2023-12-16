@@ -7,7 +7,7 @@ const logger = require('morgan');
 require('dotenv').config()
 require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 
-var qrcodeRouter = require('./routes/qrcode');
+var qrcodeRouter = require('./routes/r_qrcode');
 const gameRouter = require('./routes/r_game');
 const mapRouter = require('./routes/r_map');
 

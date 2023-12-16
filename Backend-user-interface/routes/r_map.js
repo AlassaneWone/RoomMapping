@@ -8,6 +8,4 @@ router.get('/:uid/:mapId', userCtrl.getMap)
 router.post('/:uid', upload.single('file'), userCtrl.createMap)
 router.delete('/:uid/:filename', userCtrl.deleteMap)
 
-router.get('/:uid/maps/:mapId', userCtrl.getMap)
-
 module.exports = router;
