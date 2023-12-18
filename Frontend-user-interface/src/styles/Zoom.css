@@ -1,11 +1,9 @@
 .Zoomzoom {
     font-family: sans-serif;
     text-align: center;
-    margin: 0;  /* Ajoutez cette ligne pour éliminer la marge */
-    padding: 0; /* Ajoutez cette ligne pour éliminer le rembourrage */
-}
-
-.containerStyle {
+    margin: 0;
+    padding: 0;
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -14,23 +12,31 @@
     width: 100%;
 }
 
-img {
+.Zoomzoom img {
     width: 100%;
     height: auto;
+    object-fit: contain;
 }
 
-.react-transform-component.transform-component-module_content__FBWxo {
-    width: 100vw; /* 100% de la largeur de la vue (viewport) */
-    height: 100vh; /* 100% de la hauteur de la vue (viewport) */
-    overflow: hidden; /* Empêche le contenu de déborder */
+.Zoomzoom .react-transform-component.transform-component-module_content__FBWxo {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.react-transform-component.transform-component-module_content__FBWxo img {
-    width: auto; /* Ajuste la largeur proportionnellement à la hauteur */
-    height: auto; /* Ajuste la hauteur proportionnellement à la largeur */
-    max-width: 100%; /* Garantit que l'image ne dépasse pas la largeur du conteneur */
-    max-height: 100%; /* Garantit que l'image ne dépasse pas la hauteur du conteneur */
+.Zoomzoom .react-transform-component.transform-component-module_content__FBWxo img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.Zoomzoom .controls {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
 }
