@@ -10,8 +10,11 @@ import matplotlib.colors as colors
 
 import asyncio
 import websockets
+from socket import AF_INET, socket, SOCK_STREAM
 import json
-import threading as th
+from threading import Thread
+import time
+import datetime as dt
 
 #Parametre pour l'affichage
 NOMBRE_DE_PAQUET_AFFICHE = 35
@@ -25,7 +28,7 @@ class RadarTab:
         #Set Frame and add to control bar
         self.frame_0 = Frame(master=tabControl,bg='white')
         tabControl.add(self.frame_0, text="Radar")
-        
+
         self.frame_1 = LabelFrame(self.frame_0,background= "#d1d1d1")
         self.frame_2 = LabelFrame(self.frame_0,background= "#d1d1d1" )
 
@@ -40,7 +43,7 @@ class RadarTab:
         self.frame_2_2.pack(side="top",fill="x",expand=False,padx=10)
         self.frame_2_3.pack(side="top",fill="x",expand=False,padx=10)
         self.frame_2_4.pack(side="bottom",fill="x",expand=False,padx=10,pady=[0,10])
-    
+
         self.all_x,self.all_y, self.all_confiance = [],[],[]
         self.en_cours_execution = False
         #self.connexion_websocket = websockets.connect('ws://192.168.137.1:8000')
@@ -48,9 +51,14 @@ class RadarTab:
         self.fig= Figure()
         self.fig_copy = self.fig
         self.axe = self.fig.add_subplot(projection = 'polar')
+<<<<<<< Updated upstream
         self.axe.set_ylim(bottom=0,top=TAILLE)
         
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame_1) 
+=======
+
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame_1)
+>>>>>>> Stashed changes
         self.canvas_widget = self.canvas.get_tk_widget()
         self.canvas_widget.config(width=200,height=200)
         self.canvas_widget.pack(fill='both', expand=True,padx=10,pady=10)
@@ -63,7 +71,7 @@ class RadarTab:
             }, N=256)
         self.mappable = cm.ScalarMappable(norm=colors.Normalize(MIN_CMAP, MAX_CMAP), cmap=self.custom_cmap)
         self.colorbar = self.fig.colorbar(self.mappable, ax=self.axe, orientation='horizontal', pad=0.1,shrink=1, aspect=30,label="Confiance", ticks=[0,125, 250])
-        
+
         self.label_1 = Label(self.frame_2_1,text="La distance ,l'angle " )
         self.label_1.pack(expand=True)
 
@@ -73,6 +81,30 @@ class RadarTab:
         Button(self.frame_2_3, text="Désactiver", command= self.desactiver_radar).pack(fill="both",side="left",expand=True)
         Button(self.frame_2_3, text="Clear", command= self.clear_radar).pack(fill="both",side="left",expand=True)
         Button(self.frame_2_4,text="Enregistrer", command=self.enregistrer_image).pack(fill="both",side="top",expand=True)
+<<<<<<< Updated upstream
+=======
+        Scale(self.frame_2_4,from_=1000,to=12000, orient=HORIZONTAL,resolution=1000,command=self.actualiser_radar_size,variable=self.radar_size,label="Echelle du radar:").pack(fill="both",side="bottom",expand=True)
+        self.axe.tick_params(axis='y', labelsize=TAILLE_FRONT)
+        self.client_socket = socket(AF_INET, SOCK_STREAM)
+        self.client_socket.connect(('192.168.68.62', 8000))
+
+        self.last_time = dt.datetime.today().timestamp()
+        self.diffs = []
+
+# Actualiser la taille du radar en fonction du Scale
+    def actualiser_radar_size(self,valeur):
+        self.radar_size = int(valeur)
+        if(self.radar_size>6000):
+            self.axe.set_rgrids(np.arange(0, self.radar_size, 3000))
+        elif(self.radar_size>4000):
+            self.axe.set_rgrids(np.arange(0, self.radar_size, 2000))
+        elif(self.radar_size>0):
+            self.axe.set_rgrids(np.arange(0, self.radar_size, 1000))
+        else:
+            raise ValueError
+        self.axe.set_ylim(0,self.radar_size)
+        self.canvas.draw()
+>>>>>>> Stashed changes
 
 # Enregistrer une image du radar
     def enregistrer_image(self):
@@ -85,7 +117,7 @@ class RadarTab:
 
 # Actualisation des données du radar
     def actualisation_radar(self,paquet):
-        plt.pause(0.0001)
+        # plt.pause(0.0001)
         if self.en_cours_execution == True:
             self.axe.clear()
             for i in paquet:
@@ -101,26 +133,30 @@ class RadarTab:
             self.update_display()
 
 # Partie Websocket
-    def packet_thread(self):
-        fred=th.Thread(target=self.boocle)
-        fred.start()
-        
-    def boocle(self):
-        while(self.en_cours_execution):
-            asyncio.run(self.websocket_data())
+    def receive_packets(self):
+        while True:
+            try:
+                self.client_socket.send(bytes('gimme', "utf8"))
+                msg = self.client_socket.recv(1024).decode("utf8")
+                self.actualisation_radar(json.loads(msg))
+                new_time = dt.datetime.today().timestamp()
+                self.diffs.append(new_time - self.last_time)
+                self.last_time = new_time
 
-    async def websocket_data(self):
-        try:
-            async with websockets.connect('ws://192.168.137.1:8000') as websocket:
-                await websocket.send("coucou")
-                dataPoints = await websocket.recv()
-                self.actualisation_radar(json.loads(dataPoints))
-        except:
-            pass
+                # Clip the list
+                if len(self.diffs) > 10:
+                    self.diffs = self.diffs[-10:]
+
+                print(f'{(len(self.diffs) / sum(self.diffs))*12} points per second')
+            except Exception as e:
+                print(e)
+                break
+
 
 # Partie activation et désactivition du radar
     def desactiver_radar(self):
         self.en_cours_execution = False
+        self.websocket.close()
         self.label_activation_radar.config(text="Désactiver", background="#E93030", font= "#000000")
         self.axe.scatter(x =self.all_x,y = self.all_y,c= self.all_confiance, s=TAILLE_POINTS,cmap=self.custom_cmap,vmin=MIN_CMAP,vmax=MAX_CMAP)
         self.update_display()
@@ -128,7 +164,7 @@ class RadarTab:
     def activer_radar(self):
         self.en_cours_execution = True
         self.label_activation_radar.config(text="Activer",background="#49CC1F", font= "#000000")
-        self.packet_thread()
+        Thread(target=self.receive_packets).start()
         self.update_display()
 
     def clear_radar(self):
