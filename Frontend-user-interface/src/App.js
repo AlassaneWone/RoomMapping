@@ -11,7 +11,6 @@ import Map from "./pages/Map";
 import Register from "./pages/Register";
 import MyAccount from "./pages/MyAccount";
 import MapEditor from './pages/MapEditor';
-import Zoomzoom from "./pages/Zoomzoom";
 
 function App() {
     return (
