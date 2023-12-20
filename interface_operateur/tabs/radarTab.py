@@ -9,7 +9,6 @@ import matplotlib.cm as cm
 import matplotlib.colors as colors
 
 import asyncio
-import websockets
 from socket import AF_INET, socket, SOCK_STREAM
 import json
 from threading import Thread
@@ -51,14 +50,9 @@ class RadarTab:
         self.fig= Figure()
         self.fig_copy = self.fig
         self.axe = self.fig.add_subplot(projection = 'polar')
-<<<<<<< Updated upstream
         self.axe.set_ylim(bottom=0,top=TAILLE)
         
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame_1) 
-=======
-
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame_1)
->>>>>>> Stashed changes
         self.canvas_widget = self.canvas.get_tk_widget()
         self.canvas_widget.config(width=200,height=200)
         self.canvas_widget.pack(fill='both', expand=True,padx=10,pady=10)
@@ -81,12 +75,11 @@ class RadarTab:
         Button(self.frame_2_3, text="Désactiver", command= self.desactiver_radar).pack(fill="both",side="left",expand=True)
         Button(self.frame_2_3, text="Clear", command= self.clear_radar).pack(fill="both",side="left",expand=True)
         Button(self.frame_2_4,text="Enregistrer", command=self.enregistrer_image).pack(fill="both",side="top",expand=True)
-<<<<<<< Updated upstream
-=======
-        Scale(self.frame_2_4,from_=1000,to=12000, orient=HORIZONTAL,resolution=1000,command=self.actualiser_radar_size,variable=self.radar_size,label="Echelle du radar:").pack(fill="both",side="bottom",expand=True)
-        self.axe.tick_params(axis='y', labelsize=TAILLE_FRONT)
+
+        Scale(self.frame_2_4,from_=1000,to=12000, orient=HORIZONTAL,resolution=1000,command=self.actualiser_radar_size,variable=TAILLE,label="Echelle du radar:").pack(fill="both",side="bottom",expand=True)
+        self.axe.tick_params(axis='y', labelsize=TAILLE)
         self.client_socket = socket(AF_INET, SOCK_STREAM)
-        self.client_socket.connect(('192.168.68.62', 8000))
+        self.client_socket.connect(('192.168.137.80', 8000))
 
         self.last_time = dt.datetime.today().timestamp()
         self.diffs = []
@@ -104,7 +97,6 @@ class RadarTab:
             raise ValueError
         self.axe.set_ylim(0,self.radar_size)
         self.canvas.draw()
->>>>>>> Stashed changes
 
 # Enregistrer une image du radar
     def enregistrer_image(self):
@@ -156,7 +148,6 @@ class RadarTab:
 # Partie activation et désactivition du radar
     def desactiver_radar(self):
         self.en_cours_execution = False
-        self.websocket.close()
         self.label_activation_radar.config(text="Désactiver", background="#E93030", font= "#000000")
         self.axe.scatter(x =self.all_x,y = self.all_y,c= self.all_confiance, s=TAILLE_POINTS,cmap=self.custom_cmap,vmin=MIN_CMAP,vmax=MAX_CMAP)
         self.update_display()
