@@ -1,0 +1,44 @@
+{
+  "name": "drawingtool",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@benjeau/react-native-draw": "^0.8.3",
+    "@expo/webpack-config": "^19.0.0",
+    "@react-native-community/masked-view": "^0.1.11",
+    "@react-navigation/native": "^6.1.9",
+    "@react-navigation/stack": "^6.3.20",
+    "@shopify/react-native-skia": "0.1.196",
+    "android-platform-tools": "^3.0.2",
+    "cmake-js": "^7.2.1",
+    "expo": "~49.0.15",
+    "expo-status-bar": "~1.6.0",
+    "ninja": "^3.0.8",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.72.6",
+    "react-native-gesture-handler": "^2.13.4",
+    "react-native-paint": "^1.1.0",
+    "react-native-reanimated": "~3.3.0",
+    "react-native-safe-area-context": "^4.7.4",
+    "react-native-screens": "^3.27.0",
+    "react-native-web": "~0.19.6",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
+    "xcode": "^3.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
+  },
+  "private": true,
+  "optionalDependencies": {
+    "bufferutil": "^4.0.8",
+    "utf-8-validate": "^5.0.10"
+  }
+}
